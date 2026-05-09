@@ -1,18 +1,15 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Waves, 
-  Layers, 
-  Mountain, 
-  MapPin, 
-  History, 
-  LayoutDashboard, 
-  Satellite, 
-  Wifi, 
-  Battery, 
-  Signal, 
+import {
+  Waves,
+  Layers,
+  Mountain,
+  MapPin,
+  History,
+  LayoutDashboard,
+  Satellite,
+  Signal,
   X,
-  Linkedin,
   Mail,
   Phone,
   Compass,
@@ -21,7 +18,8 @@ import {
   VolumeX,
   Activity,
   Monitor,
-  Info
+  Info,
+  LinkedinIcon
 } from 'lucide-react';
 import { CV_DATA } from './data';
 
@@ -405,9 +403,9 @@ export default function App() {
               <activeConfig.icon size={24} strokeWidth={2.5} className="md:w-8 md:h-8 lg:w-10 lg:h-10 relative z-10" />
               <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             </motion.div>
-            <h1 
-              className="text-2xl font-black tracking-tight md:text-5xl lg:text-7xl xl:text-8xl uppercase"
-              style={{ color: activeColor, textShadow: `0 0 35px ${activeColor}33` }}
+            <h1
+              className="text-2xl font-bold tracking-[-0.03em] md:text-5xl lg:text-7xl xl:text-8xl uppercase"
+              style={{ color: activeColor, textShadow: `0 0 35px ${activeColor}33`, fontWeight: 700 }}
             >
               Hello!
             </h1>
@@ -486,7 +484,7 @@ export default function App() {
             <div className="h-6 w-6 rounded-full border border-white/20 overflow-hidden">
                <img src={CV_DATA.profile.profileImage} alt="" className="h-full w-full object-cover grayscale" />
             </div>
-            <span className="text-[8px] font-black tracking-widest text-white/60">ANDHIKA</span>
+            <span className="text-[8px] font-bold tracking-widest text-white/60">ANDHIKA</span>
             <div className="h-3 w-[1px] bg-white/10" />
             <span className="text-[8px] font-mono text-white/30 truncate max-w-[100px]">{CV_DATA.profile.coordinates}</span>
           </motion.div>
@@ -974,7 +972,7 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: any) {
                   <span className="group-hover:translate-x-1 transition-transform truncate">{CV_DATA.profile.email}</span>
                 </a>
                 <a href="#" className="flex items-center gap-3 md:gap-4 text-sm group">
-                  <div className="p-2.5 md:p-3 bg-white/5 rounded-full group-hover:bg-white/10 transition-colors"><Linkedin size={16} className="md:w-[18px] md:h-[18px]" style={{ color: themeColor }} /></div>
+                  <div className="p-2.5 md:p-3 bg-white/5 rounded-full group-hover:bg-white/10 transition-colors"><LinkedinIcon size={16} className="md:w-[18px] md:h-[18px]" style={{ color: themeColor }} /></div>
                   <span className="group-hover:translate-x-1 transition-transform">LinkedIn Official</span>
                 </a>
                 <a href="#" className="flex items-center gap-3 md:gap-4 text-sm group">
@@ -1116,7 +1114,7 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: any) {
                 <div className="grid grid-cols-3 gap-6 md:gap-12 w-full max-w-sm md:max-w-md">
                    {[
                      { icon: <Mail size={20} className="md:w-6 md:h-6" />, label: 'MAIL', link: `mailto:${CV_DATA.profile.email}` },
-                     { icon: <Linkedin size={20} className="md:w-6 md:h-6" />, label: 'LINKED', link: '#' },
+                     { icon: <LinkedinIcon size={20} className="md:w-6 md:h-6" />, label: 'LINKED', link: '#' },
                      { icon: <Phone size={20} className="md:w-6 md:h-6" />, label: 'CALL', link: '#' }
                    ].map((item, i) => (
                      <a key={i} href={item.link} className="flex flex-col items-center gap-2 md:gap-3 group">
