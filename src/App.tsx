@@ -18,9 +18,18 @@ import {
   VolumeX,
   Activity,
   Monitor,
-  Info,
-  LinkedinIcon
+  Info
 } from 'lucide-react';
+
+function LinkedInIcon({ size = 24, className = '', style = {} }: { size?: number; className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
+      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+      <rect width="4" height="12" x="2" y="9" />
+      <circle cx="4" cy="4" r="2" />
+    </svg>
+  );
+}
 import { CV_DATA } from './data';
 
 // Hook for window size
@@ -787,73 +796,105 @@ function MapNode({ position, label, sec, icon, themeColor, activeConfig, onClick
       className={`${useGridLayout ? 'relative col-span-1 w-full' : 'absolute -translate-x-1/2 -translate-y-1/2'} flex flex-col items-center group cursor-pointer z-20`}
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      whileHover={{ scale: 1.05 }}
+      whileHover={{ scale: 1.04 }}
+      whileTap={{ scale: 0.96 }}
       onClick={onClick}
     >
-      <div className={`relative flex h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 items-center justify-center border border-white/10 bg-[#080a0b]/80 backdrop-blur-md shadow-2xl transition-all group-hover:border-white/40 ${activeConfig.shape}`}>
-        <div className="absolute inset-0 opacity-10 transition-opacity group-hover:opacity-25" style={{ backgroundColor: themeColor }} />
-        <div className="z-10 transition-transform group-hover:scale-110" style={{ color: themeColor }}>
+      {/* Icon button */}
+      <div
+        className={`relative flex h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 items-center justify-center border border-white/10 bg-[#080a0b]/80 backdrop-blur-md shadow-2xl transition-all duration-300 group-hover:border-white/30 ${activeConfig.shape}`}
+      >
+        {/* BG tint fill */}
+        <div
+          className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300"
+          style={{ backgroundColor: themeColor, borderRadius: 'inherit' }}
+        />
+
+        {/* Icon */}
+        <div className="z-10 transition-transform duration-300 group-hover:scale-110" style={{ color: themeColor }}>
           {React.cloneElement(icon, { size: 28, className: "md:w-7 md:h-7 lg:w-9 lg:h-9" })}
         </div>
-        
-        {/* Animated Ornaments */}
-        <div className="absolute -inset-2 md:-inset-3 border border-dashed border-white/5 animate-spin-slow rounded-full opacity-40 group-hover:opacity-60" style={{ animationDuration: '20s' }} />
-        
-        {/* Hydro Mode Specific: Sonar Sweep */}
+
+        {/* Outer dashed orbit ring */}
+        <div
+          className="absolute -inset-3 md:-inset-4 border border-dashed border-white/5 group-hover:border-white/15 animate-spin-slow rounded-full transition-colors duration-700"
+          style={{ animationDuration: '20s' }}
+        />
+
+        {/* Hydro: sonar sweep */}
         {activeConfig.labelPrefix === 'DEPTH_SEC' && (
-           <motion.div 
-             className="absolute inset-0 border-r-2 border-blue-400/40 rounded-full"
-             animate={{ rotate: 360 }}
-             transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-           />
-        )}
-        
-        {/* GIS Mode Specific: Digital Corners */}
-        {activeConfig.labelPrefix === 'LAYER_ID' && (
           <>
-            <div className="absolute top-0 left-0 w-1.5 h-1.5 md:w-2 md:h-2 border-t md:border-t-2 border-l md:border-l-2 border-white/40" />
-            <div className="absolute bottom-0 right-0 w-1.5 h-1.5 md:w-2 md:h-2 border-b md:border-b-2 border-r md:border-r-2 border-white/40" />
+            <motion.div
+              className="absolute inset-0 border-r-2 rounded-full"
+              style={{ borderColor: `${themeColor}55` }}
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+            />
+            <div
+              className="absolute inset-0 border border-transparent group-hover:scale-125 transition-all duration-500 rounded-full"
+              style={{ borderColor: `${themeColor}20` }}
+            />
           </>
         )}
 
-        {/* Land Mode Specific: Crosshair */}
+        {/* GIS: 4-corner brackets */}
+        {activeConfig.labelPrefix === 'LAYER_ID' && (
+          <>
+            <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-white/30 group-hover:border-white/70 transition-colors duration-200" />
+            <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-white/30 group-hover:border-white/70 transition-colors duration-200" />
+            <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-white/30 group-hover:border-white/70 transition-colors duration-200" />
+            <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-white/30 group-hover:border-white/70 transition-colors duration-200" />
+          </>
+        )}
+
+        {/* Survey: crosshair */}
         {activeConfig.labelPrefix === 'STA_REF' && (
-          <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
-            <div className="w-full h-[0.5px] md:h-[1px] bg-white" />
-            <div className="h-full w-[0.5px] md:w-[1px] bg-white absolute" />
+          <div className="absolute inset-0 flex items-center justify-center opacity-10 group-hover:opacity-35 transition-opacity duration-300 pointer-events-none">
+            <div className="w-full h-px bg-white" />
+            <div className="h-full w-px bg-white absolute" />
           </div>
         )}
-        
+
+        {/* GEO: precision reticle */}
         {activeConfig.labelPrefix === 'PREC_LVL' && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-1.5 h-1.5 border border-white/40 rounded-full" />
-            <div className="absolute w-6 h-[0.5px] bg-white/20" />
-            <div className="absolute h-6 w-[0.5px] bg-white/20" />
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-15 group-hover:opacity-50 transition-opacity duration-300">
+            <div className="w-2 h-2 border border-white/70 rounded-full" />
+            <div className="absolute w-8 h-px bg-white/30" />
+            <div className="absolute h-8 w-px bg-white/30" />
           </div>
         )}
-        
-        {activeConfig.labelPrefix === 'DEPTH_SEC' && (
-           <div className="absolute inset-0 border border-transparent md:border-2 group-hover:border-blue-400/20 group-hover:scale-125 transition-all rounded-full" />
-        )}
+
+        {/* Glow halo on hover */}
+        <div
+          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+          style={{ boxShadow: `0 0 18px ${themeColor}44, 0 0 40px ${themeColor}11`, borderRadius: 'inherit' }}
+        />
       </div>
-      
-      <div className={`mt-3 md:mt-4 flex flex-col items-center border border-white/5 bg-white/5 px-2 md:px-6 lg:px-8 py-1.5 md:py-2.5 lg:py-3 backdrop-blur-xl transition-all group-hover:bg-white/10 ${useGridLayout ? 'w-full' : 'min-w-[120px] md:min-w-[160px] lg:min-w-[180px]'} ${activeConfig.shape}`}>
-        <span className="text-[10px] md:text-[13px] lg:text-[14px] font-black tracking-[0.1em] text-white/90 uppercase text-center block w-full">{label}</span>
-        <span className="mt-0.5 md:mt-1 font-mono text-[8px] md:text-[10px] font-medium text-white/30 tracking-tight">{sec}</span>
+
+      {/* Label card */}
+      <div className={`mt-3 md:mt-4 relative flex flex-col items-center overflow-hidden border border-white/5 group-hover:border-white/20 bg-white/[0.03] group-hover:bg-white/[0.07] px-3 md:px-6 lg:px-8 py-2 md:py-3 lg:py-3.5 backdrop-blur-xl transition-all duration-300 ${useGridLayout ? 'w-full' : 'min-w-[120px] md:min-w-[165px] lg:min-w-[195px]'} ${activeConfig.shape}`}>
+        {/* Theme-colored top accent line */}
+        <div
+          className="absolute top-0 left-0 right-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          style={{ backgroundColor: themeColor }}
+        />
+
+        <span className="text-[10px] md:text-[13px] lg:text-[14px] font-bold tracking-[0.08em] text-white/75 group-hover:text-white uppercase text-center block w-full transition-colors duration-200">
+          {label}
+        </span>
+        <span className="mt-0.5 font-mono text-[7px] md:text-[9px] font-normal text-white/25 group-hover:text-white/45 tracking-tight transition-colors duration-200">
+          {sec}
+        </span>
+
+        {/* OPEN indicator — slides in on hover */}
+        <div className="flex items-center gap-1 mt-1 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+          <span className="font-mono text-[7px] font-bold tracking-[0.2em] uppercase" style={{ color: themeColor }}>
+            OPEN
+          </span>
+          <ArrowRight size={7} style={{ color: themeColor }} />
+        </div>
       </div>
     </motion.div>
-  );
-}
-
-function TelemetryItem({ label, value, icon, color }: any) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className="text-white/20">{label}:</span>
-      <div className="flex items-center gap-1.5 font-bold" style={{ color }}>
-        {value}
-        {icon}
-      </div>
-    </div>
   );
 }
 
@@ -888,162 +929,225 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: any) {
         <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
           <activeConfig.icon size={200} />
         </div>
-        <button 
+        <button
           onClick={handleClose}
-          className="absolute top-4 right-4 md:top-6 md:right-6 group/close z-50 flex items-center gap-2 p-1 md:p-2 rounded-full border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all"
+          className="absolute top-4 right-4 md:top-5 md:right-5 group/close z-50 flex items-center gap-2 px-2 py-2 md:px-3 rounded-xl border border-white/8 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 transition-all duration-200"
         >
-          <span className="text-[10px] font-mono font-bold text-white/40 group-hover/close:text-white transition-colors hidden md:block">CLOSE_SEC</span>
-          <X size={18} className="text-white/40 group-hover/close:text-white transition-transform group-hover/close:rotate-90" />
+          <span className="text-[9px] font-mono font-bold text-white/30 group-hover/close:text-white/80 transition-colors hidden md:block tracking-widest">ESC</span>
+          <X size={16} className="text-white/35 group-hover/close:text-white transition-all duration-200 group-hover/close:rotate-90" />
         </button>
 
         {id === 'bio' && (
           <div className="space-y-6 md:space-y-8">
+            {/* Profile header */}
             <div className="block md:flex gap-8 items-start">
               <div className="flex-1 order-2 md:order-1">
+                {/* Mobile floating image */}
                 <div className="md:hidden">
-                   <div className={`float-right ml-4 mb-4 relative h-24 w-24 border-2 border-white/20 rounded-full overflow-hidden shadow-xl`}
-                        style={{ boxShadow: `0 0 20px ${themeColor}33` }}>
-                    <img 
-                      src={CV_DATA.profile.profileImage} 
-                      alt="" 
-                      className="h-full w-full object-cover grayscale brightness-110" 
-                      referrerPolicy="no-referrer"
-                    />
+                  <div
+                    className="float-right ml-4 mb-4 relative h-20 w-20 border-2 border-white/20 rounded-full overflow-hidden shadow-xl flex-shrink-0"
+                    style={{ boxShadow: `0 0 20px ${themeColor}33` }}
+                  >
+                    <img src={CV_DATA.profile.profileImage} alt="" className="h-full w-full object-cover grayscale brightness-110" referrerPolicy="no-referrer" />
+                    <div className="absolute inset-0 opacity-20 mix-blend-soft-light" style={{ backgroundColor: themeColor }} />
                   </div>
                 </div>
+
                 <div className="mb-2 font-mono text-[8px] md:text-[10px] font-bold tracking-[0.4em] text-white/30 uppercase">SUBJECT_IDENTIFIER</div>
-                <h2 className="text-3xl md:text-6xl font-black mb-4 tracking-tighter uppercase leading-none" style={{ color: themeColor }}>{CV_DATA.profile.name}</h2>
-                <div className="h-1 w-16 md:w-24 mb-6 md:mb-8" style={{ backgroundColor: themeColor }} />
-                <p className="text-sm md:text-xl text-white/80 leading-relaxed font-medium tracking-tight clear-both md:clear-none">{CV_DATA.profile.summary}</p>
+                <h2
+                  className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight uppercase leading-none"
+                  style={{ color: themeColor }}
+                >
+                  {CV_DATA.profile.name}
+                </h2>
+                <div className="h-px w-16 md:w-24 mb-5 md:mb-7" style={{ backgroundColor: themeColor }} />
+                <p className="text-sm md:text-base lg:text-lg text-white/70 leading-relaxed tracking-tight clear-both md:clear-none max-w-lg">
+                  {CV_DATA.profile.summary}
+                </p>
               </div>
-              <div className={`hidden md:block relative w-full md:w-56 h-72 md:h-72 flex-shrink-0 border-2 border-white/10 overflow-hidden shadow-2xl transition-all duration-700 hover:border-white/30 order-1 md:order-2 ${activeConfig.shape}`}
-                   style={{ boxShadow: `0 0 30px ${themeColor}22` }}>
-                <img 
-                  src={CV_DATA.profile.profileImage} 
-                  alt="Profile" 
-                  className="h-full w-full object-cover grayscale brightness-110 hover:grayscale-0 transition-all duration-1000 scale-105 hover:scale-100" 
+
+              {/* Desktop profile card */}
+              <div
+                className={`hidden md:block relative w-48 lg:w-56 h-64 lg:h-72 flex-shrink-0 border border-white/10 overflow-hidden shadow-2xl transition-all duration-500 hover:border-white/25 order-1 md:order-2 ${activeConfig.shape}`}
+                style={{ boxShadow: `0 0 30px ${themeColor}18` }}
+              >
+                <img
+                  src={CV_DATA.profile.profileImage}
+                  alt="Profile"
+                  className="h-full w-full object-cover grayscale brightness-110 hover:grayscale-0 transition-all duration-1000 scale-105 hover:scale-100"
                   referrerPolicy="no-referrer"
                 />
-                
-                {/* Thematic Overlays */}
-                <div className="absolute inset-0 opacity-20 mix-blend-soft-light transition-opacity hover:opacity-0" style={{ backgroundColor: themeColor }} />
-                <div className="absolute inset-0 scanline-overlay opacity-40" />
+                <div className="absolute inset-0 opacity-25 mix-blend-soft-light transition-opacity hover:opacity-0" style={{ backgroundColor: themeColor }} />
+                <div className="absolute inset-0 scanline-overlay opacity-30" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                
-                {/* Technical HUD elements */}
-                <div className="absolute top-4 left-4 flex flex-col gap-1">
-                  <div className="w-1 h-1 rounded-full animate-pulse" style={{ backgroundColor: themeColor }} />
-                  <div className="h-8 w-[1px] bg-white/10" />
+                <div className="absolute top-3 left-3 flex flex-col gap-1">
+                  <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: themeColor }} />
+                  <div className="h-6 w-px bg-white/10" />
                 </div>
-                
-                <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-[8px] font-mono text-white/40 tracking-[0.3em] uppercase">Auth_Session: 884-2X</span>
-                    <span className="text-[10px] font-bold text-white tracking-widest">ID_VERIFIED</span>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <div className="h-[1px] w-12 bg-current mb-1" style={{ color: themeColor }} />
-                    <span className="text-[8px] font-mono text-white/30">L-ACQ: 0.02ms</span>
+                <div className="absolute bottom-3 left-3 right-3">
+                  <div className="text-[7px] font-mono text-white/40 tracking-[0.25em] uppercase mb-0.5">AUTH // ID_VERIFIED</div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-bold text-white tracking-wider">ANDHIKA P.</span>
+                    <div className="h-px w-8" style={{ backgroundColor: themeColor }} />
                   </div>
                 </div>
               </div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              <div className="bg-white/2 rounded-lg p-5 md:p-6 border border-white/5">
-                <h4 className="font-mono text-[8px] md:text-[9px] text-white/30 mb-4 md:mb-5 tracking-[0.3em] flex items-center gap-2">
-                  <div className="w-1 h-1 rounded-full animate-ping" style={{ backgroundColor: themeColor }} />
-                  ACADEMIC_RECORD
+
+            {/* Info cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+              {/* Academic record */}
+              <div className="rounded-xl p-5 md:p-6 border border-white/8 bg-white/[0.02]" style={{ borderLeft: `3px solid ${themeColor}55` }}>
+                <h4 className="font-mono text-[8px] md:text-[9px] text-white/35 mb-4 tracking-[0.35em] flex items-center gap-2 uppercase">
+                  <div className="w-1 h-1 rounded-full" style={{ backgroundColor: themeColor }} />
+                  Academic_Record
                 </h4>
                 {CV_DATA.education.map((edu, i) => (
-                  <div key={i} className="space-y-2 md:space-y-3">
-                    <p className="font-bold text-lg md:text-xl">{edu.institution}</p>
-                    <p className="text-sm text-white/60 font-medium tracking-tight" style={{ color: themeColor }}>{edu.degree}</p>
-                    <div className="mt-3 md:mt-4 p-3 md:p-4 border border-white/5 bg-black/40 rounded text-xs text-white/50 leading-relaxed">
+                  <div key={i} className="space-y-1.5 md:space-y-2">
+                    <p className="font-bold text-base md:text-lg leading-tight">{edu.institution}</p>
+                    <p className="text-xs md:text-sm font-medium" style={{ color: themeColor }}>{edu.degree}</p>
+                    <div className="mt-3 p-3 border border-white/5 bg-black/30 rounded-lg text-[11px] md:text-xs text-white/45 leading-relaxed">
                       {edu.specialization}
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="bg-white/2 rounded-lg p-5 md:p-6 border border-white/5 flex flex-col gap-3 md:gap-4">
-                <h4 className="font-mono text-[8px] md:text-[9px] text-white/30 mb-2 tracking-[0.3em]">COMM_CHANNELS</h4>
-                <a href={`mailto:${CV_DATA.profile.email}`} className="flex items-center gap-3 md:gap-4 text-sm group">
-                  <div className="p-2.5 md:p-3 bg-white/5 rounded-full group-hover:bg-white/10 transition-colors"><Mail size={16} className="md:w-[18px] md:h-[18px]" style={{ color: themeColor }} /></div>
-                  <span className="group-hover:translate-x-1 transition-transform truncate">{CV_DATA.profile.email}</span>
-                </a>
-                <a href="#" className="flex items-center gap-3 md:gap-4 text-sm group">
-                  <div className="p-2.5 md:p-3 bg-white/5 rounded-full group-hover:bg-white/10 transition-colors"><LinkedinIcon size={16} className="md:w-[18px] md:h-[18px]" style={{ color: themeColor }} /></div>
-                  <span className="group-hover:translate-x-1 transition-transform">LinkedIn Official</span>
-                </a>
-                <a href="#" className="flex items-center gap-3 md:gap-4 text-sm group">
-                  <div className="p-2.5 md:p-3 bg-white/5 rounded-full group-hover:bg-white/10 transition-colors"><MapPin size={16} className="md:w-[18px] md:h-[18px]" style={{ color: themeColor }} /></div>
-                  <span className="group-hover:translate-x-1 transition-transform">{CV_DATA.profile.location}</span>
-                </a>
+
+              {/* Comm channels */}
+              <div className="rounded-xl p-5 md:p-6 border border-white/8 bg-white/[0.02] flex flex-col gap-3" style={{ borderLeft: `3px solid ${themeColor}33` }}>
+                <h4 className="font-mono text-[8px] md:text-[9px] text-white/35 tracking-[0.35em] uppercase">Comm_Channels</h4>
+                {[
+                  { href: `mailto:${CV_DATA.profile.email}`, icon: <Mail size={15} style={{ color: themeColor }} />, label: CV_DATA.profile.email },
+                  { href: '#', icon: <LinkedInIcon size={15} style={{ color: themeColor }} />, label: 'LinkedIn Profile' },
+                  { href: '#', icon: <MapPin size={15} style={{ color: themeColor }} />, label: CV_DATA.profile.location },
+                ].map((item, i) => (
+                  <a
+                    key={i}
+                    href={item.href}
+                    className="flex items-center gap-3 text-xs md:text-sm group/link rounded-lg px-3 py-2.5 border border-white/0 hover:border-white/8 hover:bg-white/[0.04] transition-all duration-200"
+                  >
+                    <div className="p-2 bg-white/[0.04] rounded-lg group-hover/link:bg-white/[0.08] transition-colors flex-shrink-0">
+                      {item.icon}
+                    </div>
+                    <span className="text-white/55 group-hover/link:text-white/90 transition-colors truncate group-hover/link:translate-x-0.5 transform duration-200">
+                      {item.label}
+                    </span>
+                    <ArrowRight size={12} className="ml-auto opacity-0 group-hover/link:opacity-100 transition-opacity flex-shrink-0" style={{ color: themeColor }} />
+                  </a>
+                ))}
               </div>
             </div>
           </div>
         )}
 
         {id === 'experience' && (
-          <div className="space-y-12">
-            <div className="space-y-8 md:space-y-10">
-               <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-white/5 pb-6">
-                  <div>
-                    <h2 className="text-2xl md:text-4xl font-bold tracking-tighter" style={{ color: themeColor }}>Work_History</h2>
-                    <p className="font-mono text-[8px] md:text-[9px] text-white/20 mt-1 uppercase tracking-[0.2em]">Primary Professional Records</p>
-                  </div>
-                  <div className="font-mono text-[8px] md:text-[9px] text-white/20 tracking-widest whitespace-nowrap bg-white/5 px-2 py-1 rounded">TIMELINE_LOG // V.01</div>
-               </div>
-              <div className="space-y-6 md:space-y-8">
+          <div className="space-y-10 md:space-y-14">
+            {/* Work History */}
+            <div className="space-y-6 md:space-y-8">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 pb-4 border-b border-white/8">
+                <div>
+                  <p className="font-mono text-[8px] md:text-[9px] text-white/25 mb-1 uppercase tracking-[0.3em]">Primary Professional Records</p>
+                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight" style={{ color: themeColor }}>Work History</h2>
+                </div>
+                <div className="font-mono text-[8px] text-white/20 tracking-widest whitespace-nowrap bg-white/[0.04] border border-white/8 px-2.5 py-1 rounded-md">
+                  TIMELINE_LOG // V.01
+                </div>
+              </div>
+
+              <div className="space-y-5 md:space-y-7">
                 {CV_DATA.experience.map((exp, i) => (
-                  <div key={i} className="relative pl-6 md:pl-10 border-l-2 border-white/5 group">
-                    <div className="absolute left-[-9px] md:left-[-11px] top-0 h-4 w-4 md:h-5 md:w-5 rounded-full bg-[#080a0b] border-2 md:border-4 transition-all group-hover:scale-125" style={{ borderColor: themeColor }} />
-                    <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-3 md:mb-4">
-                      <div>
-                        <h3 className="font-bold text-xl md:text-2xl group-hover:text-white transition-colors leading-tight">{exp.company}</h3>
-                        <p className="text-sm md:text-base font-medium opacity-80 mt-1" style={{ color: themeColor }}>{exp.role}</p>
-                      </div>
-                      <span className="mt-2 md:mt-0 font-mono text-[9px] md:text-[10px] text-white/40 bg-white/5 px-2.5 py-1 md:px-3 md:py-1.5 rounded w-fit whitespace-nowrap">{exp.period}</span>
+                  <div key={i} className="relative pl-7 md:pl-10 group">
+                    {/* Timeline line */}
+                    <div
+                      className="absolute left-[7px] md:left-[9px] top-5 bottom-[-20px] w-px"
+                      style={{ background: `linear-gradient(to bottom, ${themeColor}44, transparent)` }}
+                    />
+                    {/* Timeline dot */}
+                    <div
+                      className="absolute left-0 top-1 w-3.5 h-3.5 md:w-4 md:h-4 rounded-full bg-[#080a0b] border-2 transition-all duration-300 group-hover:scale-110 flex items-center justify-center"
+                      style={{ borderColor: themeColor }}
+                    >
+                      <div
+                        className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        style={{ backgroundColor: themeColor }}
+                      />
                     </div>
-                    <ul className="space-y-2 md:space-y-3">
-                      {exp.points.map((p, j) => (
-                        <li key={j} className="text-xs md:text-sm text-white/50 flex gap-3 md:gap-4 leading-relaxed group-hover:text-white/80 transition-colors">
-                          <ArrowRight size={12} className="md:w-3.5 md:h-3.5 flex-shrink-0 mt-1" style={{ color: themeColor }} />
-                          {p}
-                        </li>
-                      ))}
-                    </ul>
+
+                    <div className="bg-white/[0.02] border border-white/5 group-hover:border-white/10 rounded-xl p-4 md:p-5 transition-all duration-300">
+                      <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-2 mb-3">
+                        <div>
+                          <h3 className="font-bold text-base md:text-lg lg:text-xl text-white/80 group-hover:text-white transition-colors leading-tight">{exp.company}</h3>
+                          <p className="text-xs md:text-sm font-medium mt-1 leading-snug" style={{ color: themeColor }}>{exp.role}</p>
+                        </div>
+                        <span
+                          className="font-mono text-[8px] md:text-[9px] text-white/35 whitespace-nowrap border border-white/8 px-2.5 py-1 rounded-md w-fit self-start"
+                          style={{ borderLeftColor: themeColor, borderLeftWidth: '2px' }}
+                        >
+                          {exp.period}
+                        </span>
+                      </div>
+                      <ul className="space-y-1.5 md:space-y-2">
+                        {exp.points.map((p, j) => (
+                          <li key={j} className="text-[11px] md:text-xs text-white/45 flex gap-2.5 leading-relaxed group-hover:text-white/65 transition-colors">
+                            <div className="w-1 h-1 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: themeColor }} />
+                            {p}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="space-y-8 md:space-y-10">
-               <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-white/5 pb-6">
-                  <div>
-                    <h2 className="text-2xl md:text-4xl font-bold tracking-tighter" style={{ color: themeColor }}>Leadership_Exp</h2>
-                    <p className="font-mono text-[8px] md:text-[9px] text-white/20 mt-1 uppercase tracking-[0.2em]">Organizational Contribution</p>
-                  </div>
-               </div>
-              <div className="space-y-6 md:space-y-8">
+            {/* Leadership */}
+            <div className="space-y-6 md:space-y-8">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 pb-4 border-b border-white/8">
+                <div>
+                  <p className="font-mono text-[8px] md:text-[9px] text-white/25 mb-1 uppercase tracking-[0.3em]">Organizational Contribution</p>
+                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight" style={{ color: themeColor }}>Leadership</h2>
+                </div>
+              </div>
+
+              <div className="space-y-5 md:space-y-7">
                 {CV_DATA.organizations.map((org, i) => (
-                  <div key={i} className="relative pl-6 md:pl-10 border-l-2 border-white/5 group">
-                    <div className="absolute left-[-9px] md:left-[-11px] top-0 h-4 w-4 md:h-5 md:w-5 rounded-full bg-[#080a0b] border-2 md:border-4 transition-all group-hover:scale-125" style={{ borderColor: themeColor }} />
-                    <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-3 md:mb-4">
-                      <div>
-                        <h3 className="font-bold text-xl md:text-2xl group-hover:text-white transition-colors leading-tight">{org.company}</h3>
-                        <p className="text-sm md:text-base font-medium opacity-80 mt-1" style={{ color: themeColor }}>{org.role}</p>
-                      </div>
-                      <span className="mt-2 md:mt-0 font-mono text-[9px] md:text-[10px] text-white/40 bg-white/5 px-2.5 py-1 md:px-3 md:py-1.5 rounded w-fit whitespace-nowrap">{org.period}</span>
+                  <div key={i} className="relative pl-7 md:pl-10 group">
+                    <div
+                      className="absolute left-[7px] md:left-[9px] top-5 bottom-[-20px] w-px"
+                      style={{ background: `linear-gradient(to bottom, ${themeColor}33, transparent)` }}
+                    />
+                    <div
+                      className="absolute left-0 top-1 w-3.5 h-3.5 md:w-4 md:h-4 rounded-full bg-[#080a0b] border-2 transition-all duration-300 group-hover:scale-110 flex items-center justify-center"
+                      style={{ borderColor: themeColor }}
+                    >
+                      <div
+                        className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        style={{ backgroundColor: themeColor }}
+                      />
                     </div>
-                    <ul className="space-y-2 md:space-y-3">
-                      {org.points.map((p, j) => (
-                        <li key={j} className="text-xs md:text-sm text-white/50 flex gap-3 md:gap-4 leading-relaxed group-hover:text-white/80 transition-colors">
-                          <ArrowRight size={12} className="md:w-3.5 md:h-3.5 flex-shrink-0 mt-1" style={{ color: themeColor }} />
-                          {p}
-                        </li>
-                      ))}
-                    </ul>
+
+                    <div className="bg-white/[0.02] border border-white/5 group-hover:border-white/10 rounded-xl p-4 md:p-5 transition-all duration-300">
+                      <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-2 mb-3">
+                        <div>
+                          <h3 className="font-bold text-base md:text-lg lg:text-xl text-white/80 group-hover:text-white transition-colors leading-tight">{org.company}</h3>
+                          <p className="text-xs md:text-sm font-medium mt-1" style={{ color: themeColor }}>{org.role}</p>
+                        </div>
+                        <span
+                          className="font-mono text-[8px] md:text-[9px] text-white/35 whitespace-nowrap border border-white/8 px-2.5 py-1 rounded-md w-fit self-start"
+                          style={{ borderLeftColor: themeColor, borderLeftWidth: '2px' }}
+                        >
+                          {org.period}
+                        </span>
+                      </div>
+                      <ul className="space-y-1.5 md:space-y-2">
+                        {org.points.map((p, j) => (
+                          <li key={j} className="text-[11px] md:text-xs text-white/45 flex gap-2.5 leading-relaxed group-hover:text-white/65 transition-colors">
+                            <div className="w-1 h-1 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: themeColor }} />
+                            {p}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1053,86 +1157,139 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: any) {
 
         {id === 'projects' && (
           <div className="space-y-6 md:space-y-8">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tighter" style={{ color: themeColor }}>Tech_Stack</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-              <div className="border border-white/5 bg-white/2 rounded-xl p-6 md:p-8 group text-center md:text-left">
-                <h3 className="font-bold text-lg md:text-xl mb-4 md:mb-6 flex items-center justify-center md:justify-start gap-2 md:gap-3">
-                  <Satellite size={18} className="md:w-5 md:h-5" style={{ color: themeColor }} /> 
-                  FIELD_EXP
-                </h3>
-                <div className="flex flex-wrap justify-center md:justify-start gap-2">
+            <div>
+              <p className="font-mono text-[8px] md:text-[9px] text-white/25 mb-1.5 uppercase tracking-[0.3em]">Capabilities & Tools</p>
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight" style={{ color: themeColor }}>Tech Stack</h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+              {/* Field experience */}
+              <div className="border border-white/8 bg-white/[0.02] rounded-xl p-5 md:p-6" style={{ borderTop: `2px solid ${themeColor}55` }}>
+                <div className="flex items-center gap-2 mb-4">
+                  <Satellite size={14} style={{ color: themeColor }} />
+                  <h3 className="font-mono text-[9px] md:text-[10px] font-bold tracking-[0.3em] text-white/40 uppercase">Field_Expertise</h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
                   {CV_DATA.skills.technical.map((s, i) => (
-                    <span key={i} className="text-[10px] md:text-[11px] px-2.5 py-1 md:px-3 md:py-1.5 bg-black/40 border border-white/10 rounded-md hover:bg-white/5 transition-colors">{s}</span>
+                    <span
+                      key={i}
+                      className="text-[10px] md:text-[11px] px-2.5 py-1 md:px-3 md:py-1.5 bg-black/30 border border-white/8 hover:border-white/20 rounded-lg text-white/60 hover:text-white/90 transition-all duration-200 cursor-default"
+                    >
+                      {s}
+                    </span>
                   ))}
                 </div>
               </div>
-              <div className="border border-white/5 bg-white/2 rounded-xl p-6 md:p-8 group text-center md:text-left">
-                <h3 className="font-bold text-lg md:text-xl mb-4 md:mb-6 flex items-center justify-center md:justify-start gap-2 md:gap-3">
-                  <LayoutDashboard size={18} className="md:w-5 md:h-5" style={{ color: themeColor }} /> 
-                  SYSTEM_TOOLS
-                </h3>
-                <div className="flex flex-wrap justify-center md:justify-start gap-2">
+
+              {/* Software tools */}
+              <div className="border border-white/8 bg-white/[0.02] rounded-xl p-5 md:p-6" style={{ borderTop: `2px solid ${themeColor}33` }}>
+                <div className="flex items-center gap-2 mb-4">
+                  <LayoutDashboard size={14} style={{ color: themeColor }} />
+                  <h3 className="font-mono text-[9px] md:text-[10px] font-bold tracking-[0.3em] text-white/40 uppercase">System_Tools</h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
                   {CV_DATA.skills.tools.map((t, i) => (
-                    <span key={i} className="text-[10px] md:text-[11px] px-2.5 py-1 md:px-3 md:py-1.5 bg-black/40 border border-white/10 rounded-md hover:border-white/30 transition-colors font-bold" style={{ color: themeColor }}>{t}</span>
+                    <span
+                      key={i}
+                      className="text-[10px] md:text-[11px] px-2.5 py-1 md:px-3 md:py-1.5 bg-black/30 border rounded-lg font-medium hover:bg-white/[0.04] transition-all duration-200 cursor-default"
+                      style={{ borderColor: `${themeColor}44`, color: themeColor }}
+                    >
+                      {t}
+                    </span>
                   ))}
                 </div>
               </div>
             </div>
-            
-            <div className="border border-white/5 p-6 md:p-10 bg-white/2 rounded-xl md:rounded-2xl overflow-hidden relative group">
-               <motion.div 
-                 className="absolute top-[-30%] right-[-10%] opacity-[0.03] group-hover:opacity-[0.08] transition-opacity"
-                 animate={{ rotate: [0, 360] }}
-                 transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-               >
-                 <Layers size={200} className="md:w-[300px] md:h-[300px]" />
-               </motion.div>
-               <div className="font-mono text-[8px] md:text-[9px] text-white/30 mb-2 md:mb-3 tracking-[0.3em] md:tracking-[0.4em]">RESEARCH_THESIS</div>
-               <h3 className="font-bold text-xl md:text-2xl mb-3 md:mb-4 leading-tight">Spatial Information Systems for Disaster Mitigation</h3>
-               <p className="text-sm md:text-base text-white/50 leading-relaxed italic">{CV_DATA.education[0].thesis}</p>
+
+            {/* Research thesis */}
+            <div className="border border-white/8 bg-white/[0.02] rounded-xl md:rounded-2xl overflow-hidden relative group">
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                   style={{ background: `radial-gradient(ellipse at top right, ${themeColor}08 0%, transparent 70%)` }} />
+              <motion.div
+                className="absolute top-[-20%] right-[-5%] opacity-[0.03] group-hover:opacity-[0.07] transition-opacity pointer-events-none"
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
+              >
+                <Layers size={220} />
+              </motion.div>
+
+              <div className="relative p-6 md:p-8 lg:p-10">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: themeColor }} />
+                  <span className="font-mono text-[8px] md:text-[9px] text-white/30 tracking-[0.35em] uppercase">Research_Thesis</span>
+                </div>
+                <h3 className="font-bold text-lg md:text-xl lg:text-2xl mb-3 leading-tight text-white/90">
+                  Spatial Information Systems for Disaster Mitigation
+                </h3>
+                <div className="h-px w-12 mb-4" style={{ backgroundColor: `${themeColor}66` }} />
+                <p className="text-xs md:text-sm text-white/45 leading-relaxed italic max-w-xl">
+                  {CV_DATA.education[0].thesis}
+                </p>
+              </div>
             </div>
           </div>
         )}
 
         {id === 'contact' && (
-          <div className="space-y-8 md:space-y-10 py-4 md:py-6 text-center">
-             <div className="space-y-1 md:space-y-2">
-                <h2 className="text-3xl md:text-5xl font-bold tracking-tighter" style={{ color: themeColor }}>Get In Touch</h2>
-                <p className="text-white/40 font-mono text-[8px] md:text-[10px] tracking-[0.3em] md:tracking-[0.5em]">AWAITING_COMM_LINK</p>
-             </div>
+          <div className="space-y-8 md:space-y-10 py-2 md:py-4 text-center">
+            <div className="space-y-1 md:space-y-2">
+              <p className="font-mono text-[8px] md:text-[9px] text-white/25 tracking-[0.4em] uppercase mb-2">Awaiting_Comm_Link</p>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight" style={{ color: themeColor }}>Get In Touch</h2>
+            </div>
 
-             <div className="flex flex-col items-center gap-8 md:gap-10">
-                <div className="h-32 w-32 md:h-40 md:w-40 rounded-full border-[4px] md:border-[6px] border-dashed animate-spin-slow flex items-center justify-center p-4 md:p-6 bg-white/2" style={{ borderColor: `${themeColor}44`, animationDuration: '15s' }}>
+            <div className="flex flex-col items-center gap-8 md:gap-10">
+              {/* Animated orbit icon */}
+              <div className="relative flex items-center justify-center h-36 w-36 md:h-44 md:w-44">
+                <div
+                  className="absolute inset-0 rounded-full border-2 border-dashed animate-spin-slow"
+                  style={{ borderColor: `${themeColor}33`, animationDuration: '12s' }}
+                />
+                <div
+                  className="absolute inset-3 rounded-full border border-dashed animate-spin-slow"
+                  style={{ borderColor: `${themeColor}18`, animationDuration: '20s', animationDirection: 'reverse' }}
+                />
+                <div
+                  className="w-24 h-24 md:w-28 md:h-28 rounded-full flex items-center justify-center"
+                  style={{ background: `radial-gradient(circle, ${themeColor}12 0%, transparent 70%)` }}
+                >
                   <motion.div
-                    animate={{ scale: [1, 1.1, 1], opacity: [0.8, 1, 0.8] }}
-                    transition={{ duration: 2, repeat: Infinity }}
+                    animate={{ scale: [1, 1.08, 1], opacity: [0.75, 1, 0.75] }}
+                    transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
                   >
-                    <Satellite size={60} className="md:w-20 md:h-20" style={{ color: themeColor }} />
+                    <Satellite size={52} className="md:w-16 md:h-16" style={{ color: themeColor }} />
                   </motion.div>
                 </div>
-                
-                <div className="grid grid-cols-3 gap-6 md:gap-12 w-full max-w-sm md:max-w-md">
-                   {[
-                     { icon: <Mail size={20} className="md:w-6 md:h-6" />, label: 'MAIL', link: `mailto:${CV_DATA.profile.email}` },
-                     { icon: <LinkedinIcon size={20} className="md:w-6 md:h-6" />, label: 'LINKED', link: '#' },
-                     { icon: <Phone size={20} className="md:w-6 md:h-6" />, label: 'CALL', link: '#' }
-                   ].map((item, i) => (
-                     <a key={i} href={item.link} className="flex flex-col items-center gap-2 md:gap-3 group">
-                        <div className="p-4 md:p-6 bg-white/3 rounded-xl md:rounded-2xl border border-white/5 group-hover:scale-110 group-hover:bg-white/5 transition-all duration-300" style={{ color: themeColor }}>
-                          {item.icon}
-                        </div>
-                        <span className="text-[8px] md:text-[10px] font-mono font-bold tracking-[0.1em] md:tracking-[0.2em] text-white/20 group-hover:text-white transition-colors">{item.label}</span>
-                     </a>
-                   ))}
-                </div>
-                
-                <div className="mt-2 md:mt-4 p-3 md:p-4 border border-white/5 bg-white/2 rounded-full px-8 md:px-12">
-                   <p className="text-white/40 font-mono text-[8px] md:text-[10px] flex items-center gap-2 md:gap-3">
-                     <span className="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-green-500 animate-pulse" />
-                     TRANSMISSION_STABLE // NO_DROP
-                   </p>
-                </div>
-             </div>
+              </div>
+
+              {/* Contact buttons */}
+              <div className="grid grid-cols-3 gap-4 md:gap-8 w-full max-w-xs md:max-w-sm">
+                {[
+                  { icon: <Mail size={22} className="md:w-6 md:h-6" />, label: 'EMAIL', link: `mailto:${CV_DATA.profile.email}` },
+                  { icon: <LinkedInIcon size={22} className="md:w-6 md:h-6" />, label: 'LINKED', link: 'https://www.linkedin.com/in/andhika-prasetya-adi-nugroho-160278205/' },
+                  { icon: <Phone size={22} className="md:w-6 md:h-6" />, label: 'CALL', link: '#' },
+                ].map((item, i) => (
+                  <a key={i} href={item.link} className="flex flex-col items-center gap-2 md:gap-3 group">
+                    <div
+                      className="p-4 md:p-5 rounded-xl md:rounded-2xl border border-white/8 bg-white/[0.03] group-hover:bg-white/[0.07] group-hover:border-white/20 group-hover:scale-105 transition-all duration-300"
+                      style={{ color: themeColor }}
+                    >
+                      {item.icon}
+                    </div>
+                    <span className="text-[8px] md:text-[10px] font-mono font-bold tracking-[0.15em] md:tracking-[0.25em] text-white/25 group-hover:text-white/80 transition-colors">
+                      {item.label}
+                    </span>
+                  </a>
+                ))}
+              </div>
+
+              {/* Status indicator */}
+              <div className="flex items-center gap-2.5 px-6 py-2.5 rounded-full border border-white/8 bg-white/[0.02]">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
+                <p className="text-white/35 font-mono text-[8px] md:text-[9px] tracking-[0.2em] uppercase">
+                  Transmission Stable // No Drop
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </motion.div>
