@@ -739,7 +739,7 @@ export default function App() {
             </svg>
           )}
 
-          <div className={useGridLayout ? `grid grid-cols-2 gap-x-4 gap-y-6 md:gap-8 w-full px-4 md:max-w-lg mx-auto pb-56 ${isTablet && !isMobile ? 'pt-8' : ''}` : "relative h-full w-full"}>
+          <div className={useGridLayout ? `grid grid-cols-2 gap-x-4 gap-y-6 md:gap-8 w-full px-4 md:max-w-lg mx-auto pb-56 ${isTablet && !isMobile ? 'pt-8' : 'pt-4'}` : "relative h-full w-full"}>
             <MapNode
               position={useGridLayout ? undefined : { top: '36%', left: 'clamp(270px, 27%, 370px)' }}
               label={nodeCopy.bio}
