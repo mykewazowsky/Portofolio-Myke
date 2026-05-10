@@ -26,10 +26,33 @@ import { THEMES, type Theme, type ThemeConfig } from './themes';
 
 type ModalId = 'bio' | 'experience' | 'projects' | 'contact';
 
+interface ControlPoint {
+  code: string;
+  sheet: string;
+  easting: string;
+  northing: string;
+  z: string;
+  datum: string;
+  projection: string;
+  quality: string;
+}
+
+interface LayerRecord {
+  code: string;
+  label: string;
+  symbol: 'point' | 'line' | 'area' | 'grid';
+}
+
+interface ProjectGeoRecord {
+  label: string;
+  value: string;
+}
+
 interface MapNodeProps {
   position?: CSSProperties;
   label: string;
   sec: string;
+  control: ControlPoint;
   icon: ReactElement<{ size?: number; className?: string }>;
   themeColor: string;
   activeConfig: ThemeConfig;
@@ -47,6 +70,79 @@ interface ContentModalProps {
   activeConfig: ThemeConfig;
   onClose: () => void;
 }
+
+const CONTROL_POINTS: Record<ModalId, ControlPoint> = {
+  bio: {
+    code: 'GCP-001',
+    sheet: 'BDG-48S-A01',
+    easting: '789432.21',
+    northing: '9238812.44',
+    z: '+724.6 m',
+    datum: 'WGS84',
+    projection: 'UTM 48S',
+    quality: 'RTK FIX',
+  },
+  experience: {
+    code: 'BM-002',
+    sheet: 'BDG-48S-H02',
+    easting: '789618.07',
+    northing: '9238588.31',
+    z: '+719.2 m',
+    datum: 'SRGI2013',
+    projection: 'UTM 48S',
+    quality: 'CONTROL OK',
+  },
+  projects: {
+    code: 'CP-003',
+    sheet: 'BDG-48S-D03',
+    easting: '789894.55',
+    northing: '9239006.72',
+    z: '+732.8 m',
+    datum: 'WGS84',
+    projection: 'EPSG:32748',
+    quality: 'LAYER LIVE',
+  },
+  contact: {
+    code: 'COM-004',
+    sheet: 'BDG-48S-C04',
+    easting: '790112.90',
+    northing: '9238751.66',
+    z: '+721.0 m',
+    datum: 'WGS84',
+    projection: 'UTM 48S',
+    quality: 'LINK READY',
+  },
+};
+
+const MAP_LAYERS: Record<Language, LayerRecord[]> = {
+  en: [
+    { code: 'GCP', label: 'Control points', symbol: 'point' },
+    { code: 'TRN', label: 'Survey transect', symbol: 'line' },
+    { code: 'CNT', label: 'Contour interval', symbol: 'area' },
+    { code: 'GRD', label: 'UTM grid sheet', symbol: 'grid' },
+  ],
+  id: [
+    { code: 'GCP', label: 'Titik kontrol', symbol: 'point' },
+    { code: 'TRN', label: 'Jalur survei', symbol: 'line' },
+    { code: 'CNT', label: 'Interval kontur', symbol: 'area' },
+    { code: 'GRD', label: 'Grid UTM', symbol: 'grid' },
+  ],
+};
+
+const PROJECT_GEO_RECORDS: Record<Language, ProjectGeoRecord[]> = {
+  en: [
+    { label: 'METHOD', value: 'WebGIS + spatial model' },
+    { label: 'CRS', value: 'WGS84 / UTM 48S' },
+    { label: 'DATA', value: 'Flood, drought, crop productivity' },
+    { label: 'OUTPUT', value: 'Loss estimation dashboard' },
+  ],
+  id: [
+    { label: 'METODE', value: 'WebGIS + model spasial' },
+    { label: 'CRS', value: 'WGS84 / UTM 48S' },
+    { label: 'DATA', value: 'Banjir, kekeringan, produktivitas' },
+    { label: 'OUTPUT', value: 'Dashboard estimasi kerugian' },
+  ],
+};
 
 export default function App() {
   const { width } = useWindowSize();
@@ -260,6 +356,7 @@ export default function App() {
 
       {/* Background Grid */}
       <div className="grid-bg absolute inset-0 opacity-20 pointer-events-none z-1" />
+      <CartographicOverlay themeColor={activeColor} theme={theme} />
       
       {/* Dynamic Scanline */}
       <div className="scanline" style={{ color: activeColor }} />
@@ -288,6 +385,9 @@ export default function App() {
           <Compass size={800} strokeWidth={0.2} style={{ color: activeColor }} />
         </motion.div>
       </div>
+
+      <MapFurniture themeColor={activeColor} language={language} />
+      <LayerLegend themeColor={activeColor} language={language} />
 
       <AnimatePresence>
         {isIntroOpen && (
@@ -395,38 +495,38 @@ export default function App() {
       </AnimatePresence>
 
       {/* Header */}
-      <header ref={headerRef} className="fixed top-0 z-50 flex w-full flex-col gap-3 p-4 md:p-6 md:flex-row md:items-center md:justify-between lg:px-10 lg:py-6 pointer-events-none">
+      <header ref={headerRef} className="fixed top-0 z-50 flex w-full flex-col gap-2.5 p-3.5 md:p-5 md:flex-row md:items-center md:justify-between lg:px-8 lg:py-5 pointer-events-none">
         <motion.div 
           initial={{ x: -20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           className="flex flex-col items-start pointer-events-auto"
         >
-          <div className="flex items-center gap-3 md:gap-4 lg:gap-5 flex-row justify-start">
+          <div className="flex items-center gap-3 md:gap-3.5 lg:gap-4 flex-row justify-start">
             <motion.div
               key={theme}
               initial={{ scale: 0, rotate: -45 }}
               animate={{ scale: 1, rotate: 0 }}
-              className="p-2 md:p-3 lg:p-3.5 xl:p-4 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl relative overflow-hidden group"
+              className="p-2 md:p-2.5 lg:p-3 xl:p-3.5 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl relative overflow-hidden group"
               style={{ color: activeColor }}
             >
-              <BrandLogo className="relative z-10 h-8 w-8 md:h-11 md:w-11 lg:h-14 lg:w-14 xl:h-16 xl:w-16" />
+              <BrandLogo className="relative z-10 h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 xl:h-14 xl:w-14" />
               <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             </motion.div>
             <h1
-              className="text-3xl font-bold tracking-tight md:text-5xl lg:text-7xl xl:text-8xl uppercase"
+              className="text-3xl font-bold tracking-tight md:text-5xl lg:text-6xl xl:text-7xl uppercase"
               style={{ color: activeColor, textShadow: `0 0 35px ${activeColor}33`, fontWeight: 700 }}
             >
               {copy.hello}
             </h1>
           </div>
-          <div className="mt-1 flex items-center gap-1.5 md:gap-3 font-mono text-[8px] md:text-[11px] font-medium tracking-[0.2em] md:tracking-[0.4em] text-white/40">
+          <div className="mt-1 flex items-center gap-1.5 md:gap-2.5 font-mono text-[8px] md:text-[10px] font-medium tracking-[0.2em] md:tracking-[0.34em] text-white/40">
             <div className="h-1 w-1 rounded-full animate-pulse shadow-lg" style={{ backgroundColor: activeColor, boxShadow: `0 0 8px ${activeColor}` }} />
             {themeCopy.subtext.toUpperCase()}
           </div>
         </motion.div>
 
         {/* Mode Selector */}
-        <div className="flex items-center gap-2 md:gap-3 self-center pointer-events-auto">
+        <div className="flex items-center gap-1.5 md:gap-2 self-center pointer-events-auto">
           <button 
             type="button"
             aria-label={isMuted ? copy.soundOffAria : copy.soundOnAria}
@@ -436,13 +536,13 @@ export default function App() {
               if (!hasInteracted) setHasInteracted(true);
               playSound('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
             }}
-            className="p-2 md:p-3 bg-[#0a0b0c]/80 backdrop-blur-3xl border border-white/10 rounded-xl md:rounded-2xl text-white/40 hover:text-white hover:border-white/20 transition-all shadow-xl"
+            className="p-2 md:p-2.5 bg-[#0a0b0c]/80 backdrop-blur-3xl border border-white/10 rounded-xl text-white/40 hover:text-white hover:border-white/20 transition-all shadow-xl"
             style={{ color: isMuted ? undefined : activeColor }}
           >
-            {isMuted ? <VolumeX size={16} className="md:w-5 md:h-5" /> : <Volume2 size={16} className="md:w-5 md:h-5" />}
+            {isMuted ? <VolumeX size={16} className="md:h-[18px] md:w-[18px]" /> : <Volume2 size={16} className="md:h-[18px] md:w-[18px]" />}
           </button>
 
-          <div className="relative flex gap-1 p-1 bg-[#0a0b0c]/80 backdrop-blur-3xl border border-white/10 rounded-xl md:rounded-2xl shadow-2xl" role="group" aria-label="Language selector">
+          <div className="relative flex gap-1 p-1 bg-[#0a0b0c]/80 backdrop-blur-3xl border border-white/10 rounded-xl shadow-2xl" role="group" aria-label="Language selector">
             {(Object.keys(LANGUAGES) as Language[]).map((lang) => {
               const isActive = language === lang;
               return (
@@ -456,14 +556,14 @@ export default function App() {
                     if (!hasInteracted) setHasInteracted(true);
                     playSound('https://assets.mixkit.co/active_storage/sfx/2570/2570-preview.mp3');
                   }}
-                  className={`relative z-10 min-w-8 md:min-w-10 rounded-lg md:rounded-xl px-2 py-2 md:px-3 md:py-3 font-mono text-[9px] md:text-[11px] font-black tracking-[0.12em] transition-all ${
+                  className={`relative z-10 min-w-8 md:min-w-9 rounded-lg px-2 py-2 md:px-2.5 md:py-2.5 font-mono text-[9px] md:text-[10px] font-black tracking-[0.12em] transition-all ${
                     isActive ? 'text-[#080a0b]' : 'text-white/35 hover:bg-white/5 hover:text-white/75'
                   }`}
                 >
                   {isActive && (
                     <motion.div
                       layoutId="active-language"
-                      className="absolute inset-0 rounded-lg md:rounded-xl"
+                      className="absolute inset-0 rounded-lg"
                       style={{ backgroundColor: activeColor }}
                       transition={{ type: 'spring', bounce: 0.2, duration: 0.45 }}
                     />
@@ -474,7 +574,7 @@ export default function App() {
             })}
           </div>
 
-          <div className="relative flex gap-1 p-1 bg-[#0a0b0c]/80 backdrop-blur-3xl border border-white/10 rounded-xl md:rounded-2xl overflow-x-auto max-w-[48vw] sm:max-w-[58vw] md:max-w-full shadow-2xl scrollbar-hide">
+          <div className="relative flex gap-1 p-1 bg-[#0a0b0c]/80 backdrop-blur-3xl border border-white/10 rounded-xl overflow-x-auto max-w-[48vw] sm:max-w-[58vw] md:max-w-full shadow-2xl scrollbar-hide">
             {(Object.keys(THEMES) as Theme[]).map((t) => {
             const Icon = THEMES[t].icon;
             const isActive = theme === t;
@@ -485,7 +585,7 @@ export default function App() {
                 aria-label={copy.switchThemeAria(THEMES[t].label)}
                 aria-pressed={isActive}
                 onClick={() => setTheme(t)}
-                className={`relative flex flex-col md:flex-row items-center justify-center gap-0.5 md:gap-3 px-2 md:px-10 py-2 md:py-3 font-mono text-[9px] md:text-[12px] font-bold tracking-[0.05em] md:tracking-[0.15em] transition-all rounded-lg md:rounded-xl whitespace-nowrap z-10 min-w-0 flex-shrink ${
+                className={`relative flex flex-col md:flex-row items-center justify-center gap-0.5 md:gap-2 px-2 md:px-6 lg:px-7 xl:px-8 py-2 md:py-2.5 font-mono text-[9px] md:text-[10px] lg:text-[11px] font-bold tracking-[0.05em] md:tracking-[0.12em] transition-all rounded-lg whitespace-nowrap z-10 min-w-0 flex-shrink ${
                   isActive 
                     ? 'text-[#080a0b]' 
                     : 'text-white/40 hover:text-white/80 hover:bg-white/5'
@@ -494,14 +594,14 @@ export default function App() {
                 {isActive && (
                   <motion.div
                     layoutId="active-tab"
-                    className="absolute inset-0 rounded-lg md:rounded-xl shadow-xl"
+                    className="absolute inset-0 rounded-lg shadow-xl"
                     style={{ backgroundColor: activeColor }}
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                   />
                 )}
                 <Icon 
                   size={isMobile ? 14 : 10} 
-                  className="md:w-[16px] md:h-[16px] relative z-20" 
+                  className="md:h-[15px] md:w-[15px] relative z-20"
                   strokeWidth={isActive ? 3 : 2} 
                   style={{ color: isActive ? 'inherit' : THEMES[t].color }}
                 />
@@ -517,10 +617,10 @@ export default function App() {
             aria-label={isStrengthsOpen ? copy.strengthsCloseAria : copy.strengthsOpenAria}
             aria-expanded={isStrengthsOpen}
             onClick={() => setIsStrengthsOpen(!isStrengthsOpen)}
-            className="lg:hidden p-2 md:p-3 bg-[#0a0b0c]/80 backdrop-blur-3xl border border-white/10 rounded-xl md:rounded-2xl text-white/40 hover:text-white hover:border-white/20 transition-all shadow-xl"
+            className="lg:hidden p-2 md:p-2.5 bg-[#0a0b0c]/80 backdrop-blur-3xl border border-white/10 rounded-xl text-white/40 hover:text-white hover:border-white/20 transition-all shadow-xl"
             style={{ color: isStrengthsOpen ? activeColor : undefined }}
           >
-            <Info size={16} className="md:w-5 md:h-5" />
+            <Info size={16} className="md:h-[18px] md:w-[18px]" />
           </button>
         </div>
 
@@ -545,14 +645,14 @@ export default function App() {
         <motion.div 
           initial={{ x: 20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          className="hidden md:flex flex-col items-end gap-3 pointer-events-auto"
+          className="hidden md:flex flex-col items-end gap-2.5 pointer-events-auto"
         >
-          <div className="flex items-center gap-4 mb-2 group">
+          <div className="flex items-center gap-3 mb-1.5 group">
             <div className="flex flex-col items-end">
-              <div className="text-[11px] font-black tracking-widest text-white/80 group-hover:text-white transition-colors">ANDHIKA PRASETYA</div>
-              <div className="text-[9px] font-mono font-medium text-white/20 group-hover:text-white/40 transition-colors">{copy.identityStatus}</div>
+              <div className="text-[10px] font-black tracking-widest text-white/80 group-hover:text-white transition-colors">ANDHIKA PRASETYA</div>
+              <div className="text-[8px] font-mono font-medium text-white/20 group-hover:text-white/40 transition-colors">{copy.identityStatus}</div>
             </div>
-            <div className={`relative h-14 w-14 border border-white/20 bg-white/5 overflow-hidden transition-all duration-500 group-hover:border-white/40 group-hover:scale-105 shadow-2xl ${activeConfig.shape}`}
+            <div className={`relative h-12 w-12 border border-white/20 bg-white/5 overflow-hidden transition-all duration-500 group-hover:border-white/40 group-hover:scale-105 shadow-2xl ${activeConfig.shape}`}
                  style={{ boxShadow: `0 0 25px ${activeColor}22` }}>
               <img
                 src={CV_DATA.profile.profileImage}
@@ -567,14 +667,14 @@ export default function App() {
               <div className="absolute inset-0 holo-gradient" />
               
               {/* Corner Accents */}
-              <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-white/40" />
-              <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-white/40" />
+              <div className="absolute top-0 left-0 w-2.5 h-2.5 border-t-2 border-l-2 border-white/40" />
+              <div className="absolute bottom-0 right-0 w-2.5 h-2.5 border-b-2 border-r-2 border-white/40" />
             </div>
           </div>
-          <div className={`border border-white/10 bg-white/5 px-5 py-3 font-mono text-[12px] font-bold tracking-[0.2em] text-white/80 backdrop-blur-md shadow-2xl ${activeConfig.shape}`}>
+          <div className={`border border-white/10 bg-white/5 px-4 py-2.5 font-mono text-[10px] font-bold tracking-[0.18em] text-white/80 backdrop-blur-md shadow-2xl ${activeConfig.shape}`}>
             {CV_DATA.profile.coordinates}
           </div>
-          <div className="flex items-center gap-2 font-mono text-[9px] text-white/30 tracking-[0.2em]">
+          <div className="flex items-center gap-2 font-mono text-[8px] text-white/30 tracking-[0.18em]">
             <span className="w-1 h-1 rounded-full bg-blue-400 animate-ping" />
             {copy.systemReady}
           </div>
@@ -643,6 +743,7 @@ export default function App() {
               position={useGridLayout ? undefined : { top: '42%', left: 'clamp(190px, 24%, 310px)' }}
               label={nodeCopy.bio}
               sec={`${activeConfig.labelPrefix}.01 // BIO`}
+              control={CONTROL_POINTS.bio}
               icon={<MapPin size={28} />}
               themeColor={activeColor}
               activeConfig={activeConfig}
@@ -657,6 +758,7 @@ export default function App() {
               position={useGridLayout ? undefined : { top: '61%', left: '38%' }}
               label={nodeCopy.history}
               sec={`${activeConfig.labelPrefix}.02 // HIST`}
+              control={CONTROL_POINTS.experience}
               icon={<History size={28} />}
               themeColor={activeColor}
               activeConfig={activeConfig}
@@ -671,6 +773,7 @@ export default function App() {
               position={useGridLayout ? undefined : { top: '34%', left: '57%' }}
               label={nodeCopy.data}
               sec={`${activeConfig.labelPrefix}.03 // DATA`}
+              control={CONTROL_POINTS.projects}
               icon={<LayoutDashboard size={28} />}
               themeColor={activeColor}
               activeConfig={activeConfig}
@@ -685,6 +788,7 @@ export default function App() {
               position={useGridLayout ? undefined : { top: '54%', left: 'clamp(70%, 74%, calc(100% - 180px))' }}
               label={nodeCopy.contact}
               sec={`${activeConfig.labelPrefix}.04 // COMM`}
+              control={CONTROL_POINTS.contact}
               icon={<Satellite size={28} />}
               themeColor={activeColor}
               activeConfig={activeConfig}
@@ -699,7 +803,7 @@ export default function App() {
       </main>
 
       {/* Dynamic Strength Indicator - Fixed on desktop (lg+), Bottom sheet on (<lg) */}
-      <div className="fixed bottom-8 right-8 xl:bottom-10 xl:right-10 z-40 hidden lg:block">
+      <div className="fixed bottom-6 right-6 xl:bottom-8 xl:right-8 z-40 hidden lg:block">
         <AnimatePresence mode="wait">
           <motion.div
             key={theme + '-strength-desktop'}
@@ -707,7 +811,7 @@ export default function App() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}
             transition={{ duration: 0.35, ease: 'easeOut' }}
-            className={`relative w-64 xl:w-72 overflow-hidden border border-white/10 bg-[#0a0b0c]/92 p-4 xl:p-5 shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-3xl ${activeConfig.shape}`}
+            className={`relative w-56 xl:w-60 overflow-hidden border border-white/10 bg-[#0a0b0c]/92 p-3 xl:p-3.5 shadow-[0_18px_44px_rgba(0,0,0,0.76)] backdrop-blur-3xl ${activeConfig.shape}`}
             style={{
               borderRight: `3px solid ${activeColor}`,
               boxShadow: `0 20px 50px rgba(0,0,0,0.72), 0 0 32px ${activeColor}12`,
@@ -717,40 +821,40 @@ export default function App() {
               className="absolute inset-x-0 top-0 h-px opacity-70"
               style={{ background: `linear-gradient(90deg, transparent, ${activeColor}99, transparent)` }}
             />
-            <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="mb-2.5 flex items-center justify-between gap-3">
               <div>
-                <div className="font-mono text-[8px] font-bold tracking-[0.28em] text-white/35 uppercase">{copy.coreAdvantage}</div>
-                <h3 className="mt-1 text-base xl:text-lg font-black tracking-tight uppercase leading-tight" style={{ color: activeColor }}>
+                <div className="font-mono text-[7px] font-bold tracking-[0.24em] text-white/35 uppercase">{copy.coreAdvantage}</div>
+                <h3 className="mt-1 text-sm xl:text-[15px] font-black tracking-tight uppercase leading-tight" style={{ color: activeColor }}>
                   {themeCopy.strengths.title}
                 </h3>
               </div>
               <div
-                className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.035]"
+                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.035]"
                 style={{ color: activeColor, boxShadow: `inset 0 0 18px ${activeColor}0f` }}
               >
-                <BrandLogo className="h-5 w-5" />
+                <BrandLogo className="h-4 w-4" />
               </div>
             </div>
 
-            <p className="text-[10px] xl:text-[11px] text-white/50 mb-3.5 leading-relaxed font-medium">{themeCopy.strengths.description}</p>
+            <p className="text-[9px] xl:text-[10px] text-white/50 mb-3 leading-relaxed font-medium">{themeCopy.strengths.description}</p>
 
-            <div className="grid gap-1.5">
+            <div className="grid gap-1">
               {themeCopy.strengths.points.map((pt, i) => (
-                <div key={i} className="flex items-center gap-2 rounded-md border border-white/[0.04] bg-white/[0.025] px-2.5 py-1.5">
+                <div key={i} className="flex items-center gap-2 rounded-md border border-white/[0.04] bg-white/[0.025] px-2 py-1.5">
                   <div className="h-1 w-1 rounded-full flex-shrink-0" style={{ backgroundColor: activeColor }} />
-                  <span className="text-[8px] xl:text-[9px] font-mono font-bold text-white/65 tracking-[0.14em] uppercase leading-tight">{pt}</span>
+                  <span className="text-[7px] xl:text-[8px] font-mono font-bold text-white/65 tracking-[0.12em] uppercase leading-tight">{pt}</span>
                 </div>
               ))}
             </div>
 
-            <div className="mt-4 pt-3 border-t border-white/10">
-              <div className="text-[7px] xl:text-[8px] font-mono text-white/30 tracking-[0.2em] mb-1">{copy.equipmentStack}</div>
-              <div className="text-[9px] xl:text-[10px] font-bold text-white/60 tracking-tight leading-snug">{themeCopy.strengths.equipment}</div>
+            <div className="mt-3 pt-2.5 border-t border-white/10">
+              <div className="text-[7px] font-mono text-white/30 tracking-[0.18em] mb-1">{copy.equipmentStack}</div>
+              <div className="text-[8px] xl:text-[9px] font-bold text-white/60 tracking-tight leading-snug">{themeCopy.strengths.equipment}</div>
             </div>
             
-            <div className="mt-4 flex justify-between items-center opacity-20">
+            <div className="mt-3 flex justify-between items-center opacity-20">
               <div className="h-[1px] flex-1 bg-white" />
-              <span className="mx-2 font-mono text-[8px]">V.04_SEC_AUTO</span>
+              <span className="mx-2 font-mono text-[7px]">V.04_SEC_AUTO</span>
               <div className="h-[1px] w-4 bg-white" />
             </div>
           </motion.div>
@@ -765,35 +869,35 @@ export default function App() {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed bottom-0 left-0 right-0 z-50 lg:hidden rounded-t-3xl bg-[#0a0b0c]/98 border-t-4 p-6 pb-10 backdrop-blur-3xl shadow-[0_-20px_50px_rgba(0,0,0,0.8)]"
+            className="fixed bottom-0 left-0 right-0 z-50 lg:hidden rounded-t-3xl bg-[#0a0b0c]/98 border-t-4 p-5 pb-8 backdrop-blur-3xl shadow-[0_-20px_50px_rgba(0,0,0,0.8)]"
             style={{ borderColor: activeColor }}
           >
-            <div className="flex justify-center mb-6">
+            <div className="flex justify-center mb-5">
               <div className="w-12 h-1.5 bg-white/10 rounded-full" onClick={() => setIsStrengthsOpen(false)} />
             </div>
             
-            <div className="mb-2 font-mono text-[10px] font-bold tracking-[0.3em] text-white/40 uppercase">{copy.coreAdvantage}</div>
-            <h3 className="text-2xl font-black mb-2 tracking-tight uppercase" style={{ color: activeColor }}>{themeCopy.strengths.title}</h3>
-            <p className="text-[12px] text-white/50 mb-6 leading-relaxed font-medium">{themeCopy.strengths.description}</p>
+            <div className="mb-1.5 font-mono text-[9px] font-bold tracking-[0.26em] text-white/40 uppercase">{copy.coreAdvantage}</div>
+            <h3 className="text-xl font-black mb-2 tracking-tight uppercase" style={{ color: activeColor }}>{themeCopy.strengths.title}</h3>
+            <p className="text-[11px] text-white/50 mb-5 leading-relaxed font-medium">{themeCopy.strengths.description}</p>
 
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {themeCopy.strengths.points.map((pt, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <div className="w-2 h-[1px] bg-current" style={{ color: activeColor }} />
-                  <span className="text-[11px] font-mono font-bold text-white/70 tracking-widest uppercase">{pt}</span>
+                  <span className="text-[10px] font-mono font-bold text-white/70 tracking-widest uppercase">{pt}</span>
                 </div>
               ))}
             </div>
 
-            <div className="mt-8 pt-4 border-t border-white/10">
-              <div className="text-[9px] font-mono text-white/30 tracking-[0.2em] mb-1">{copy.equipmentStack}</div>
-              <div className="text-[11px] font-bold text-white/60 tracking-tight">{themeCopy.strengths.equipment}</div>
+            <div className="mt-6 pt-3 border-t border-white/10">
+              <div className="text-[8px] font-mono text-white/30 tracking-[0.18em] mb-1">{copy.equipmentStack}</div>
+              <div className="text-[10px] font-bold text-white/60 tracking-tight">{themeCopy.strengths.equipment}</div>
             </div>
             
             <button 
               type="button"
               onClick={() => setIsStrengthsOpen(false)}
-              className="mt-8 w-full py-4 rounded-xl border border-white/10 bg-white/5 font-mono text-[10px] font-bold tracking-[0.3em] text-white/40 uppercase"
+              className="mt-6 w-full py-3.5 rounded-xl border border-white/10 bg-white/5 font-mono text-[9px] font-bold tracking-[0.26em] text-white/40 uppercase"
             >
               {copy.closeDetails}
             </button>
@@ -802,17 +906,17 @@ export default function App() {
       </AnimatePresence>
 
       {/* Telemetry Fixed Panel - Responsive width and padding */}
-      <div className="fixed bottom-6 md:bottom-12 left-6 md:left-12 lg:left-12 lg:bottom-12 max-w-[calc(100%-3rem)] md:w-64 lg:w-64 z-40">
+      <div className="fixed bottom-5 left-5 z-40 max-w-[calc(100%-2.5rem)] md:bottom-8 md:left-8 md:w-56 lg:bottom-7 lg:left-8 lg:w-56">
         <div 
-          className={`glass-panel p-3 md:p-5 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] transition-all duration-500 max-w-[180px] md:max-w-none lg:w-60 lg:max-w-none ${activeConfig.shape} ${theme === 'gis' ? 'bg-white/5' : 'bg-[#0a0b0c]/80'}`}
+          className={`glass-panel p-3 md:p-3.5 backdrop-blur-2xl shadow-[0_18px_42px_rgba(0,0,0,0.76)] transition-all duration-500 max-w-[174px] md:max-w-none lg:w-52 lg:max-w-none ${activeConfig.shape} ${theme === 'gis' ? 'bg-white/5' : 'bg-[#0a0b0c]/80'}`}
           style={{ 
             borderLeft: `4px solid ${activeColor}`,
             boxShadow: `0 0 40px ${activeColor}11`
           }}
         >
-          <div className="mb-2 md:mb-3.5 flex items-center justify-between border-b border-white/5 pb-2">
-            <span className="font-mono text-[8px] md:text-[10px] tracking-[0.2em] md:tracking-[0.3em] font-bold text-white/40 uppercase truncate mr-2">SYS_LINK // ACTIVE</span>
-            <div className="flex gap-0.5 md:gap-1 items-end h-2 md:h-3 flex-shrink-0">
+          <div className="mb-2 md:mb-2.5 flex items-center justify-between border-b border-white/5 pb-2">
+            <span className="font-mono text-[8px] md:text-[9px] tracking-[0.2em] md:tracking-[0.24em] font-bold text-white/40 uppercase truncate mr-2">SYS_LINK // ACTIVE</span>
+            <div className="flex gap-0.5 md:gap-1 items-end h-2 md:h-2.5 flex-shrink-0">
               {[0.4, 0.7, 1, 0.6, 0.8].map((h, i) => (
                 <motion.div 
                   key={i}
@@ -824,7 +928,7 @@ export default function App() {
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-1 gap-1.5 md:gap-3.5 font-mono text-[9px] md:text-[11px] tracking-tighter">
+          <div className="grid grid-cols-1 gap-1.5 md:gap-2.5 font-mono text-[9px] md:text-[10px] tracking-tighter">
             {activeConfig.telemetry.slice(0, isMobile ? 2 : 3).map((item, i) => {
               const Icon = item.icon;
               return (
@@ -863,7 +967,144 @@ export default function App() {
   );
 }
 
-function MapNode({ position, label, sec, icon, themeColor, activeConfig, onClick, useGridLayout, openLabel, ariaLabel }: MapNodeProps) {
+function CartographicOverlay({ themeColor, theme }: { themeColor: string; theme: Theme }) {
+  const lineOpacity = theme === 'gis' ? 0.16 : theme === 'land' ? 0.14 : 0.12;
+
+  return (
+    <div className="pointer-events-none absolute inset-0 z-[2] overflow-hidden">
+      <div
+        className="absolute inset-0 map-sheet-grid opacity-70"
+        style={{ color: themeColor }}
+      />
+      <div
+        className="absolute inset-0 map-contour-texture mix-blend-screen"
+        style={{ color: themeColor, opacity: lineOpacity }}
+      />
+      <div className="absolute inset-x-0 top-0 flex justify-between px-8 pt-2 font-mono text-[8px] tracking-[0.22em] text-white/18">
+        {['E789000', 'E789500', 'E790000', 'E790500'].map((tick) => (
+          <span key={tick}>{tick}</span>
+        ))}
+      </div>
+      <div className="absolute inset-y-0 left-0 hidden flex-col justify-around py-28 pl-2 font-mono text-[8px] tracking-[0.18em] text-white/18 lg:flex">
+        {['N9239500', 'N9239000', 'N9238500'].map((tick) => (
+          <span key={tick} className="-rotate-90 origin-left whitespace-nowrap">{tick}</span>
+        ))}
+      </div>
+      <div className="absolute bottom-28 right-[18%] hidden items-center gap-2 font-mono text-[8px] uppercase tracking-[0.28em] text-white/18 lg:flex">
+        <span className="h-px w-10" style={{ backgroundColor: `${themeColor}66` }} />
+        MAP SERIES // GEOMATIC_CONTROL
+      </div>
+    </div>
+  );
+}
+
+function MapFurniture({ themeColor, language }: { themeColor: string; language: Language }) {
+  const copy = UI_COPY[language];
+
+  return (
+    <div className="pointer-events-none fixed inset-0 z-30">
+      <div className="absolute left-10 top-[42%] hidden font-mono text-[8px] tracking-[0.26em] text-white/22 lg:block">
+        <div className="mb-1">DATUM // WGS84</div>
+        <div>PROJ // UTM 48S</div>
+      </div>
+
+      <div className="absolute right-10 top-[31%] hidden flex-col items-center gap-2 lg:flex">
+        <div className="relative h-16 w-16 rounded-full border border-white/10 bg-black/20 backdrop-blur-sm">
+          <Compass size={42} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" style={{ color: themeColor }} strokeWidth={1.4} />
+          <div className="absolute left-1/2 top-1 h-2 w-px -translate-x-1/2 bg-white/30" />
+        </div>
+        <div className="font-mono text-[8px] font-bold tracking-[0.24em] text-white/28">TRUE NORTH</div>
+      </div>
+
+      <div className="absolute bottom-12 left-1/2 hidden -translate-x-1/2 lg:block">
+        <div className="flex items-end gap-1 font-mono text-[8px] text-white/30">
+          <span>0</span>
+          <div className="mb-1 flex h-2 w-40 border border-white/20">
+            <div className="h-full flex-1" style={{ backgroundColor: themeColor }} />
+            <div className="h-full flex-1 bg-white/8" />
+            <div className="h-full flex-1" style={{ backgroundColor: themeColor }} />
+            <div className="h-full flex-1 bg-white/8" />
+          </div>
+          <span>500 m</span>
+        </div>
+        <div className="mt-1 text-center font-mono text-[8px] tracking-[0.26em] text-white/20">SCALE 1:5000</div>
+      </div>
+
+      <div className="absolute bottom-[6.5rem] right-4 flex w-36 flex-col gap-2 rounded-xl border border-white/10 bg-[#07090a]/82 p-3 font-mono shadow-[0_18px_40px_rgba(0,0,0,0.65)] backdrop-blur-2xl lg:hidden">
+        <div className="flex items-center justify-between">
+          <div className="text-[7px] font-bold uppercase tracking-[0.2em] text-white/28">{copy.mobileMapStatus}</div>
+          <Compass size={15} style={{ color: themeColor }} />
+        </div>
+        <div className="flex items-end gap-1 text-[7px] text-white/32">
+          <span>0</span>
+          <div className="mb-0.5 flex h-1.5 flex-1 border border-white/16">
+            <div className="h-full flex-1" style={{ backgroundColor: themeColor }} />
+            <div className="h-full flex-1 bg-white/8" />
+            <div className="h-full flex-1" style={{ backgroundColor: themeColor }} />
+          </div>
+          <span>250m</span>
+        </div>
+        <div className="grid grid-cols-2 gap-1 text-[7px] uppercase tracking-[0.14em] text-white/24">
+          <span>WGS84</span>
+          <span className="text-right" style={{ color: themeColor }}>UTM48S</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LayerLegend({ themeColor, language }: { themeColor: string; language: Language }) {
+  const copy = UI_COPY[language];
+  const layers = MAP_LAYERS[language];
+
+  return (
+    <div className="pointer-events-none fixed left-8 top-[11.5rem] z-30 hidden w-52 border border-white/10 bg-[#07090a]/72 p-3 font-mono shadow-[0_18px_46px_rgba(0,0,0,0.62)] backdrop-blur-2xl lg:block xl:top-[12rem]">
+      <div className="mb-2.5 flex items-center justify-between border-b border-white/8 pb-2">
+        <span className="text-[7px] font-black uppercase tracking-[0.24em] text-white/34">{copy.layerLegend}</span>
+        <span className="text-[8px] font-bold" style={{ color: themeColor }}>L04</span>
+      </div>
+      <div className="space-y-1.5">
+        {layers.map((layer) => (
+          <div key={layer.code} className="grid grid-cols-[1.4rem_auto_1fr] items-center gap-2 text-[7px] uppercase tracking-[0.14em] text-white/38">
+            <LayerSymbol type={layer.symbol} color={themeColor} />
+            <span className="font-bold" style={{ color: themeColor }}>{layer.code}</span>
+            <span className="truncate">{layer.label}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-2.5 flex items-center gap-2 border-t border-white/8 pt-2 text-[7px] uppercase tracking-[0.2em] text-white/18">
+        <span className="h-px flex-1" style={{ backgroundColor: `${themeColor}55` }} />
+        EPSG:32748
+      </div>
+    </div>
+  );
+}
+
+function LayerSymbol({ type, color }: { type: LayerRecord['symbol']; color: string }) {
+  if (type === 'point') {
+    return <span className="mx-auto h-2 w-2 rounded-full border" style={{ borderColor: color, boxShadow: `0 0 12px ${color}66` }} />;
+  }
+
+  if (type === 'line') {
+    return <span className="h-px w-6 border-t border-dashed" style={{ borderColor: color }} />;
+  }
+
+  if (type === 'area') {
+    return <span className="h-3 w-6 border border-white/12 bg-white/[0.035]" style={{ borderTopColor: color }} />;
+  }
+
+  return (
+    <span
+      className="h-3 w-6 border border-white/12 opacity-80"
+      style={{
+        backgroundImage: `linear-gradient(to right, ${color}66 1px, transparent 1px), linear-gradient(to bottom, ${color}66 1px, transparent 1px)`,
+        backgroundSize: '6px 6px',
+      }}
+    />
+  );
+}
+
+function MapNode({ position, label, sec, control, icon, themeColor, activeConfig, onClick, useGridLayout, openLabel, ariaLabel }: MapNodeProps) {
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== 'Enter' && event.key !== ' ') return;
     event.preventDefault();
@@ -888,6 +1129,10 @@ function MapNode({ position, label, sec, icon, themeColor, activeConfig, onClick
       <div
         className={`relative flex h-[3.75rem] w-[3.75rem] md:h-20 md:w-20 lg:h-[5.5rem] lg:w-[5.5rem] xl:h-24 xl:w-24 items-center justify-center border border-white/10 bg-[#080a0b]/80 backdrop-blur-md shadow-2xl transition-all duration-300 group-hover:border-white/30 ${activeConfig.shape}`}
       >
+        <div className="absolute -top-2 left-1/2 z-20 -translate-x-1/2 rounded border border-white/10 bg-[#080a0b]/90 px-1.5 py-0.5 font-mono text-[7px] font-bold tracking-[0.18em] text-white/36">
+          {control.code}
+        </div>
+
         {/* BG tint fill */}
         <div
           className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300"
@@ -969,6 +1214,9 @@ function MapNode({ position, label, sec, icon, themeColor, activeConfig, onClick
         <span className="mt-1 font-mono text-[7px] md:text-[9px] font-normal text-white/25 group-hover:text-white/45 tracking-tight transition-colors duration-200">
           {sec}
         </span>
+        <span className="mt-1 hidden font-mono text-[7px] font-bold tracking-[0.16em] transition-colors duration-200 md:block" style={{ color: themeColor }}>
+          {control.quality}
+        </span>
 
         {/* OPEN indicator — slides in on hover */}
         <div className="flex items-center gap-1 mt-1 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
@@ -976,6 +1224,21 @@ function MapNode({ position, label, sec, icon, themeColor, activeConfig, onClick
             {openLabel}
           </span>
           <ArrowRight size={7} style={{ color: themeColor }} />
+        </div>
+      </div>
+
+      <div className={`pointer-events-none absolute ${useGridLayout ? 'hidden' : 'block'} left-1/2 top-full mt-3 w-52 -translate-x-1/2 border border-white/8 bg-[#07090a]/88 p-3 font-mono text-[8px] tracking-[0.14em] text-white/35 opacity-0 shadow-2xl backdrop-blur-xl transition-all duration-300 group-hover:translate-y-1 group-hover:opacity-100 ${activeConfig.shape}`}>
+        <div className="mb-2 flex items-center justify-between">
+          <span style={{ color: themeColor }}>{control.projection}</span>
+          <span>{control.datum}</span>
+        </div>
+        <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
+          <span className="text-white/18">E</span>
+          <span>{control.easting}</span>
+          <span className="text-white/18">N</span>
+          <span>{control.northing}</span>
+          <span className="text-white/18">Z</span>
+          <span>{control.z}</span>
         </div>
       </div>
     </motion.div>
@@ -986,6 +1249,8 @@ function ContentModal({ id, language, themeColor, activeConfig, onClose }: Conte
   const dialogRef = useRef<HTMLDivElement>(null);
   const copy = UI_COPY[language];
   const cv = CV_CONTENT[language];
+  const control = CONTROL_POINTS[id];
+  const projectGeoRecords = PROJECT_GEO_RECORDS[language];
 
   const handleClose = () => {
     const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2569/2569-preview.mp3');
@@ -1034,6 +1299,37 @@ function ContentModal({ id, language, themeColor, activeConfig, onClose }: Conte
         {/* Modal Decorative Elements based on theme */}
         <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
           <activeConfig.icon size={200} />
+        </div>
+        <div className="mb-5 border-b border-white/8 pb-4 font-mono">
+          <div className="mb-2 flex items-center justify-between gap-3 text-[8px] uppercase tracking-[0.22em] text-white/24 md:text-[9px]">
+            <span>{copy.modalMapIndex}</span>
+            <span style={{ color: themeColor }}>{control.code}</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-[8px] uppercase tracking-[0.18em] text-white/28 md:grid-cols-4 md:text-[9px]">
+            {[
+              ['SHEET', control.sheet],
+              ['DATUM', control.datum],
+              ['PROJ', control.projection],
+              ['QC', control.quality],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-md border border-white/[0.04] bg-white/[0.02] px-2.5 py-2">
+                <div className="mb-1 text-white/18">{label}</div>
+                <div className="font-bold" style={{ color: themeColor }}>{value}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-2 grid grid-cols-3 gap-2 text-[8px] uppercase tracking-[0.16em] text-white/24">
+            {[
+              ['E', control.easting],
+              ['N', control.northing],
+              ['Z', control.z],
+            ].map(([label, value]) => (
+              <div key={label} className="flex items-center justify-between rounded-md border border-white/[0.04] bg-black/20 px-2.5 py-1.5">
+                <span>{label}</span>
+                <span className="font-bold text-white/42">{value}</span>
+              </div>
+            ))}
+          </div>
         </div>
         <button
           type="button"
@@ -1338,10 +1634,22 @@ function ContentModal({ id, language, themeColor, activeConfig, onClose }: Conte
                 <p className="text-xs md:text-sm text-white/45 leading-relaxed italic max-w-xl">
                   {cv.education[0].thesis}
                 </p>
+                <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {projectGeoRecords.map((record) => (
+                    <div key={record.label} className="rounded-lg border border-white/[0.055] bg-black/24 px-3 py-2.5">
+                      <div className="mb-1 font-mono text-[7px] font-bold uppercase tracking-[0.2em] text-white/22">
+                        {record.label}
+                      </div>
+                      <div className="text-[11px] font-semibold leading-snug text-white/62">
+                        {record.value}
+                      </div>
+                    </div>
+                  ))}
+                </div>
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-2 font-mono text-[8px] md:text-[9px] uppercase tracking-[0.28em] text-white/25">
                     <span className="h-px w-8" style={{ backgroundColor: `${themeColor}44` }} />
-                    PADIS_WEBGIS
+                    {copy.researchMetadata} // PADIS_WEBGIS
                   </div>
                   <a
                     href={CV_DATA.education[0].thesisUrl}

@@ -71,6 +71,23 @@
   background-size: 400px 400px;
 }
 
+.map-sheet-grid {
+  background-image:
+    linear-gradient(to right, currentColor 1px, transparent 1px),
+    linear-gradient(to bottom, currentColor 1px, transparent 1px),
+    linear-gradient(to right, currentColor 1px, transparent 1px),
+    linear-gradient(to bottom, currentColor 1px, transparent 1px);
+  background-size: 160px 160px, 160px 160px, 40px 40px, 40px 40px;
+  background-position: center;
+  opacity: 0.08;
+}
+
+.map-contour-texture {
+  background-image: url("data:image/svg+xml,%3Csvg width='520' height='320' viewBox='0 0 520 320' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.7)' stroke-width='1'%3E%3Cpath d='M-30 120 C60 40 105 210 210 130 S390 20 560 130'/%3E%3Cpath d='M-40 180 C70 110 125 265 230 190 S395 90 560 195' opacity='.75'/%3E%3Cpath d='M10 250 C100 180 170 330 280 250 S440 150 560 260' opacity='.55'/%3E%3Cpath d='M50 55 C120 5 175 95 250 55 S385 -10 470 65' opacity='.45'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 520px 320px;
+  background-position: center;
+}
+
 .data-stream {
   background: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
   background-size: 100% 4px;
