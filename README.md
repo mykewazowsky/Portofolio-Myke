@@ -18,6 +18,8 @@ Fitur utama:
 - Profil personal dengan nuansa geospatial command interface
 - Riwayat pengalaman kerja, organisasi, dan technical stack
 - Section Research Thesis dengan akses langsung ke PADIS WebGIS
+- Tombol Download CV Andhika dari file PDF portfolio
+- Metadata SEO, Open Graph, dan aksesibilitas dasar untuk navigasi interaktif
 - Tampilan responsif untuk desktop dan mobile
 - Animasi dan micro-interaction menggunakan Motion
 
@@ -42,12 +44,16 @@ Fitur utama:
 ```text
 Portofolio-Web/
 |-- public/
+|   |-- Andhika_Nugroho_CV_Resume.pdf
 |   `-- profile-picture.jpg
 |-- src/
 |   |-- App.tsx
 |   |-- data.ts
+|   |-- hooks.ts
+|   |-- icons.tsx
 |   |-- index.css
-|   `-- main.tsx
+|   |-- main.tsx
+|   `-- themes.tsx
 |-- index.html
 |-- package.json
 |-- tsconfig.json

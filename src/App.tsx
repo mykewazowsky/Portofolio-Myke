@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
+import type { CSSProperties, KeyboardEvent, ReactElement } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Waves,
   Layers,
-  Mountain,
   MapPin,
   History,
   LayoutDashboard,
   Satellite,
-  Signal,
   X,
   Mail,
   Phone,
@@ -16,171 +14,35 @@ import {
   ArrowRight,
   Volume2,
   VolumeX,
-  Activity,
-  Monitor,
   Info,
+  Download,
   ExternalLink
 } from 'lucide-react';
-
-function LinkedInIcon({ size = 24, className = '', style = {} }: { size?: number; className?: string; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
-      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-      <rect width="4" height="12" x="2" y="9" />
-      <circle cx="4" cy="4" r="2" />
-    </svg>
-  );
-}
 import { CV_DATA } from './data';
+import { useWindowSize } from './hooks';
+import { LinkedInIcon } from './icons';
+import { THEMES, type Theme, type ThemeConfig } from './themes';
 
-// Hook for window size
-function useWindowSize() {
-  const [windowSize, setWindowSize] = useState({
-    width: typeof window !== 'undefined' ? window.innerWidth : 0,
-    height: typeof window !== 'undefined' ? window.innerHeight : 0,
-  });
+type ModalId = 'bio' | 'experience' | 'projects' | 'contact';
 
-  useEffect(() => {
-    function handleResize() {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    }
-    
-    window.addEventListener("resize", handleResize);
-    handleResize();
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  return windowSize;
-}
-
-type Theme = 'hydro' | 'gis' | 'land' | 'precision';
-
-interface ThemeConfig {
-  color: string;
-  accent: string;
+interface MapNodeProps {
+  position?: CSSProperties;
   label: string;
-  icon: any;
-  subtext: string;
-  bg: string;
-  labelPrefix: string;
-  shape: string;
-  aesthetic: 'fluid' | 'brutal' | 'rugged' | 'precision';
-  sound: string;
-  bgSound: string;
-  telemetry: {
-    label: string;
-    value: string;
-    icon: any;
-  }[];
-  strengths: {
-    title: string;
-    description: string;
-    points: string[];
-    equipment: string;
-  };
+  sec: string;
+  icon: ReactElement<{ size?: number; className?: string }>;
+  themeColor: string;
+  activeConfig: ThemeConfig;
+  onClick: () => void;
+  useGridLayout: boolean;
+  mobileOrder?: number;
 }
 
-const THEMES: Record<Theme, ThemeConfig> = {
-  hydro: { 
-    color: '#00ccff', 
-    accent: '#0066ff',
-    label: 'HYDRO', 
-    icon: Waves, 
-    subtext: 'Hydrographic Surveyor',
-    bg: 'https://images.unsplash.com/photo-1439405326854-014607f694d7?auto=format&fit=crop&q=80&w=2000',
-    labelPrefix: 'DEPTH_SEC',
-    shape: 'rounded-2xl',
-    aesthetic: 'fluid',
-    sound: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3',
-    bgSound: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3', // Ambient/Watery vibe
-    telemetry: [
-      { label: 'BATY', value: '24.5m', icon: Waves },
-      { label: 'SONAR', value: '1540m/s', icon: Monitor },
-      { label: 'BEAM', value: '200kHz', icon: Activity }
-    ],
-    strengths: {
-      title: 'Adaptive Versatility',
-      description: 'Mastery in bathymetric acquisition and sonar interpretation. Navigating complex underwater environments with fluid problem-solving and deep technical insight.',
-      points: ['Sub-bottom Profiling', 'Multibeam Acquisition', 'Real-time Data Processing'],
-      equipment: 'Kongsberg EM2040 / EdgeTech 4125'
-    }
-  },
-  gis: { 
-    color: '#ffffff', 
-    accent: '#333333',
-    label: 'GIS', 
-    icon: Layers, 
-    subtext: 'GIS Analyst & Modeler',
-    bg: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2000',
-    labelPrefix: 'LAYER_ID',
-    shape: 'tech-clip',
-    aesthetic: 'brutal',
-    sound: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3',
-    bgSound: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3', // Technical/Electronic
-    telemetry: [
-      { label: 'BAND', value: 'L-BAND', icon: Satellite },
-      { label: 'FLUX', value: '1.2GB/s', icon: Monitor },
-      { label: 'LYR', value: '1288', icon: Layers }
-    ],
-    strengths: {
-      title: 'Analytical Depth',
-      description: 'Architecting complex geospatial databases and topological models. Converting raw spatial data into strategic intelligence through layered logic.',
-      points: ['Network Topology', 'Raster Analysis', 'Python Automation'],
-      equipment: 'ArcGIS Pro / PostgreSQL-PostGIS'
-    }
-  },
-  land: { 
-    color: '#ffcc00', 
-    accent: '#ff6600',
-    label: 'SURVEY', 
-    icon: Mountain, 
-    subtext: 'Land Surveyor Specialist',
-    bg: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000',
-    labelPrefix: 'STA_REF',
-    shape: 'rounded-xl',
-    aesthetic: 'rugged',
-    sound: 'https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3',
-    bgSound: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3', // Natural/Open
-    telemetry: [
-      { label: 'H-ACC', value: '0.012m', icon: Signal },
-      { label: 'V-ACC', value: '0.018m', icon: Monitor },
-      { label: 'DATUM', value: 'WGS84', icon: Mountain }
-    ],
-    strengths: {
-      title: 'Grounded Reliability',
-      description: 'Establishing geodetic control in the most demanding terrains. Precision execution through rigorous field procedures and engineering mastery.',
-      points: ['Cadastral Mapping', 'Topographic Detail', 'Boundary Recovery'],
-      equipment: 'Leica TS16 / Nikon Nivel'
-    }
-  },
-  precision: {
-    color: '#00ff88',
-    accent: '#006633',
-    label: 'GEO',
-    icon: Compass,
-    subtext: 'Geodetic Engineer',
-    bg: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&q=80&w=2000',
-    labelPrefix: 'PREC_LVL',
-    shape: 'rounded-sm',
-    aesthetic: 'precision',
-    sound: 'https://assets.mixkit.co/active_storage/sfx/2570/2570-preview.mp3',
-    bgSound: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3', // High-Precision/Modern
-    telemetry: [
-      { label: 'ITRF', value: 'ITRF20', icon: Satellite },
-      { label: 'REF', value: 'SRGI2013', icon: Signal },
-      { label: 'PPM', value: '0.5ppm', icon: Activity }
-    ],
-    strengths: {
-      title: 'Extreme Precision',
-      description: 'Pushing the limits of measurement through satellite geodesy and high-frequency sensor fusion. Eliminating error through absolute mathematical rigor.',
-      points: ['CORS Management', 'GNSS Post-Processing', 'Deformation Analysis'],
-      equipment: 'Trimble R12i / RTK-DGPS'
-    }
-  }
-};
+interface ContentModalProps {
+  id: ModalId;
+  themeColor: string;
+  activeConfig: ThemeConfig;
+  onClose: () => void;
+}
 
 export default function App() {
   const { width } = useWindowSize();
@@ -189,7 +51,7 @@ export default function App() {
   const useGridLayout = width < 1024;
 
   const [theme, setThemeState] = useState<Theme>('hydro');
-  const [activeTab, setActiveTab] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<ModalId | null>(null);
   const [telemetryPing, setTelemetryPing] = useState(14);
   const [isMuted, setIsMuted] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
@@ -226,7 +88,7 @@ export default function App() {
     setTimeout(() => setIsTransitioning(false), 500);
   };
 
-  const handleOpenTab = (tab: string) => {
+  const handleOpenTab = (tab: ModalId) => {
     setActiveTab(tab);
     playSound('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
     if (!hasInteracted) setHasInteracted(true);
@@ -240,6 +102,7 @@ export default function App() {
     }
 
     const audio = audioRef.current;
+    let fadeIn: number | undefined;
     
     // Reset volume and change source
     const currentBgSound = THEMES[theme].bgSound;
@@ -261,7 +124,7 @@ export default function App() {
         // Fade In
         audio.volume = 0;
         let vol = 0;
-        const fadeIn = setInterval(() => {
+        fadeIn = window.setInterval(() => {
           vol = Math.min(0.2, vol + 0.02);
           audio.volume = vol;
           if (vol >= 0.2) clearInterval(fadeIn);
@@ -274,13 +137,14 @@ export default function App() {
     playAudio();
 
     return () => {
+      if (fadeIn) window.clearInterval(fadeIn);
       // Small fade out
       let vol = audio.volume;
-      const fadeOut = setInterval(() => {
+      const fadeOut = window.setInterval(() => {
         vol = Math.max(0, vol - 0.05);
         audio.volume = vol;
         if (vol <= 0) {
-          clearInterval(fadeOut);
+          window.clearInterval(fadeOut);
         }
       }, 50);
     };
@@ -429,6 +293,9 @@ export default function App() {
         {/* Mode Selector */}
         <div className="flex items-center gap-2 md:gap-3 self-center pointer-events-auto">
           <button 
+            type="button"
+            aria-label={isMuted ? 'Enable interface sound' : 'Mute interface sound'}
+            aria-pressed={!isMuted}
             onClick={() => {
               setIsMuted(!isMuted);
               if (!hasInteracted) setHasInteracted(true);
@@ -447,6 +314,9 @@ export default function App() {
             return (
               <button
                 key={t}
+                type="button"
+                aria-label={`Switch to ${THEMES[t].label} mode`}
+                aria-pressed={isActive}
                 onClick={() => setTheme(t)}
                 className={`relative flex flex-col md:flex-row items-center justify-center gap-0.5 md:gap-3 px-2 md:px-10 py-2 md:py-3 font-mono text-[9px] md:text-[12px] font-bold tracking-[0.05em] md:tracking-[0.15em] transition-all rounded-lg md:rounded-xl whitespace-nowrap z-10 min-w-0 flex-shrink ${
                   isActive 
@@ -476,6 +346,9 @@ export default function App() {
           </div>
 
           <button 
+            type="button"
+            aria-label={isStrengthsOpen ? 'Close core advantage details' : 'Open core advantage details'}
+            aria-expanded={isStrengthsOpen}
             onClick={() => setIsStrengthsOpen(!isStrengthsOpen)}
             className="lg:hidden p-2 md:p-3 bg-[#0a0b0c]/80 backdrop-blur-3xl border border-white/10 rounded-xl md:rounded-2xl text-white/40 hover:text-white hover:border-white/20 transition-all shadow-xl"
             style={{ color: isStrengthsOpen ? activeColor : undefined }}
@@ -492,7 +365,7 @@ export default function App() {
             className="flex items-center gap-3 px-4 py-1.5 bg-white/5 backdrop-blur-md rounded-full border border-white/10 pointer-events-auto"
           >
             <div className="h-6 w-6 rounded-full border border-white/20 overflow-hidden">
-               <img src={CV_DATA.profile.profileImage} alt="" className="h-full w-full object-cover grayscale" />
+               <img src={CV_DATA.profile.profileImage} alt="Andhika profile" className="h-full w-full object-cover grayscale" decoding="async" />
             </div>
             <span className="text-[8px] font-bold tracking-widest text-white/60">ANDHIKA</span>
             <div className="h-3 w-[1px] bg-white/10" />
@@ -514,8 +387,9 @@ export default function App() {
                  style={{ boxShadow: `0 0 25px ${activeColor}22` }}>
               <img 
                 src={CV_DATA.profile.profileImage} 
-                alt="Profile" 
+                alt="Andhika profile"
                 className="h-full w-full object-cover grayscale brightness-110 contrast-125 transition-all duration-700 group-hover:grayscale-0 group-hover:contrast-100"
+                decoding="async"
                 referrerPolicy="no-referrer"
               />
               {/* Dynamic Theme Filter */}
@@ -720,6 +594,7 @@ export default function App() {
             </div>
             
             <button 
+              type="button"
               onClick={() => setIsStrengthsOpen(false)}
               className="mt-8 w-full py-4 rounded-xl border border-white/10 bg-white/5 font-mono text-[10px] font-bold tracking-[0.3em] text-white/40 uppercase"
             >
@@ -790,16 +665,26 @@ export default function App() {
   );
 }
 
-function MapNode({ position, label, sec, icon, themeColor, activeConfig, onClick, useGridLayout }: any) {
+function MapNode({ position, label, sec, icon, themeColor, activeConfig, onClick, useGridLayout }: MapNodeProps) {
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    onClick();
+  };
+
   return (
     <motion.div
       style={!useGridLayout ? { ...position } : {}}
       className={`${useGridLayout ? 'relative col-span-1 w-full' : 'absolute -translate-x-1/2 -translate-y-1/2'} flex flex-col items-center group cursor-pointer z-20`}
+      role="button"
+      tabIndex={0}
+      aria-label={`Open ${label} details`}
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       whileHover={{ scale: 1.04 }}
       whileTap={{ scale: 0.96 }}
       onClick={onClick}
+      onKeyDown={handleKeyDown}
     >
       {/* Icon button */}
       <div
@@ -899,13 +784,28 @@ function MapNode({ position, label, sec, icon, themeColor, activeConfig, onClick
   );
 }
 
-function ContentModal({ id, themeColor, activeConfig, onClose }: any) {
+function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalProps) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+
   const handleClose = () => {
     const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2569/2569-preview.mp3');
     audio.volume = 0.1;
     audio.play().catch(() => {});
     onClose();
   };
+
+  useEffect(() => {
+    dialogRef.current?.focus();
+
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        handleClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <motion.div 
@@ -916,6 +816,11 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: any) {
       className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-8 backdrop-blur-xl bg-black/60 cursor-pointer"
     >
       <motion.div 
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="content-modal-title"
+        tabIndex={-1}
         initial={{ scale: 0.95, y: 30 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.95, y: 30 }}
@@ -931,6 +836,8 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: any) {
           <activeConfig.icon size={200} />
         </div>
         <button
+          type="button"
+          aria-label="Close details"
           onClick={handleClose}
           className="absolute top-4 right-4 md:top-5 md:right-5 group/close z-50 flex items-center gap-2 px-2 py-2 md:px-3 rounded-xl border border-white/8 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 transition-all duration-200"
         >
@@ -949,13 +856,14 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: any) {
                     className="float-right ml-4 mb-4 relative h-20 w-20 border-2 border-white/20 rounded-full overflow-hidden shadow-xl flex-shrink-0"
                     style={{ boxShadow: `0 0 20px ${themeColor}33` }}
                   >
-                    <img src={CV_DATA.profile.profileImage} alt="" className="h-full w-full object-cover grayscale brightness-110" referrerPolicy="no-referrer" />
+                    <img src={CV_DATA.profile.profileImage} alt="Andhika profile" className="h-full w-full object-cover grayscale brightness-110" loading="lazy" decoding="async" referrerPolicy="no-referrer" />
                     <div className="absolute inset-0 opacity-20 mix-blend-soft-light" style={{ backgroundColor: themeColor }} />
                   </div>
                 </div>
 
                 <div className="mb-2 font-mono text-[8px] md:text-[10px] font-bold tracking-[0.4em] text-white/30 uppercase">SUBJECT_IDENTIFIER</div>
                 <h2
+                  id="content-modal-title"
                   className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight uppercase leading-none"
                   style={{ color: themeColor }}
                 >
@@ -974,8 +882,10 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: any) {
               >
                 <img
                   src={CV_DATA.profile.profileImage}
-                  alt="Profile"
+                  alt="Andhika profile"
                   className="h-full w-full object-cover grayscale brightness-110 hover:grayscale-0 transition-all duration-1000 scale-105 hover:scale-100"
+                  loading="lazy"
+                  decoding="async"
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 opacity-25 mix-blend-soft-light transition-opacity hover:opacity-0" style={{ backgroundColor: themeColor }} />
@@ -1019,12 +929,14 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: any) {
                 <h4 className="font-mono text-[8px] md:text-[9px] text-white/35 tracking-[0.35em] uppercase">Comm_Channels</h4>
                 {[
                   { href: `mailto:${CV_DATA.profile.email}`, icon: <Mail size={15} style={{ color: themeColor }} />, label: CV_DATA.profile.email },
-                  { href: '#', icon: <LinkedInIcon size={15} style={{ color: themeColor }} />, label: 'LinkedIn Profile' },
-                  { href: '#', icon: <MapPin size={15} style={{ color: themeColor }} />, label: CV_DATA.profile.location },
+                  { href: CV_DATA.profile.linkedinUrl, icon: <LinkedInIcon size={15} style={{ color: themeColor }} />, label: 'LinkedIn Profile', external: true },
+                  { href: CV_DATA.profile.mapsUrl, icon: <MapPin size={15} style={{ color: themeColor }} />, label: CV_DATA.profile.location, external: true },
                 ].map((item, i) => (
                   <a
                     key={i}
                     href={item.href}
+                    target={item.external ? '_blank' : undefined}
+                    rel={item.external ? 'noreferrer' : undefined}
                     className="flex items-center gap-3 text-xs md:text-sm group/link rounded-lg px-3 py-2.5 border border-white/0 hover:border-white/8 hover:bg-white/[0.04] transition-all duration-200"
                   >
                     <div className="p-2 bg-white/[0.04] rounded-lg group-hover/link:bg-white/[0.08] transition-colors flex-shrink-0">
@@ -1048,7 +960,7 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: any) {
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 pb-4 border-b border-white/8">
                 <div>
                   <p className="font-mono text-[8px] md:text-[9px] text-white/25 mb-1 uppercase tracking-[0.3em]">Primary Professional Records</p>
-                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight" style={{ color: themeColor }}>Work History</h2>
+                  <h2 id="content-modal-title" className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight" style={{ color: themeColor }}>Work History</h2>
                 </div>
                 <div className="font-mono text-[8px] text-white/20 tracking-widest whitespace-nowrap bg-white/[0.04] border border-white/8 px-2.5 py-1 rounded-md">
                   TIMELINE_LOG // V.01
@@ -1160,7 +1072,7 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: any) {
           <div className="space-y-6 md:space-y-8">
             <div>
               <p className="font-mono text-[8px] md:text-[9px] text-white/25 mb-1.5 uppercase tracking-[0.3em]">Capabilities & Tools</p>
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight" style={{ color: themeColor }}>Tech Stack</h2>
+              <h2 id="content-modal-title" className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight" style={{ color: themeColor }}>Tech Stack</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
@@ -1255,7 +1167,7 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: any) {
           <div className="space-y-8 md:space-y-10 py-2 md:py-4 text-center">
             <div className="space-y-1 md:space-y-2">
               <p className="font-mono text-[8px] md:text-[9px] text-white/25 tracking-[0.4em] uppercase mb-2">Awaiting_Comm_Link</p>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight" style={{ color: themeColor }}>Get In Touch</h2>
+              <h2 id="content-modal-title" className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight" style={{ color: themeColor }}>Get In Touch</h2>
             </div>
 
             <div className="flex flex-col items-center gap-8 md:gap-10">
@@ -1286,10 +1198,16 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: any) {
               <div className="grid grid-cols-3 gap-4 md:gap-8 w-full max-w-xs md:max-w-sm">
                 {[
                   { icon: <Mail size={22} className="md:w-6 md:h-6" />, label: 'EMAIL', link: `mailto:${CV_DATA.profile.email}` },
-                  { icon: <LinkedInIcon size={22} className="md:w-6 md:h-6" />, label: 'LINKED', link: 'https://www.linkedin.com/in/andhika-prasetya-adi-nugroho-160278205/' },
-                  { icon: <Phone size={22} className="md:w-6 md:h-6" />, label: 'CALL', link: '#' },
+                  { icon: <LinkedInIcon size={22} className="md:w-6 md:h-6" />, label: 'LINKED', link: CV_DATA.profile.linkedinUrl, external: true },
+                  { icon: <Phone size={22} className="md:w-6 md:h-6" />, label: 'CALL', link: CV_DATA.profile.phoneUrl },
                 ].map((item, i) => (
-                  <a key={i} href={item.link} className="flex flex-col items-center gap-2 md:gap-3 group">
+                  <a
+                    key={i}
+                    href={item.link}
+                    target={item.external ? '_blank' : undefined}
+                    rel={item.external ? 'noreferrer' : undefined}
+                    className="flex flex-col items-center gap-2 md:gap-3 group"
+                  >
                     <div
                       className="p-4 md:p-5 rounded-xl md:rounded-2xl border border-white/8 bg-white/[0.03] group-hover:bg-white/[0.07] group-hover:border-white/20 group-hover:scale-105 transition-all duration-300"
                       style={{ color: themeColor }}
@@ -1302,6 +1220,20 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: any) {
                   </a>
                 ))}
               </div>
+
+              <a
+                href={CV_DATA.profile.cvUrl}
+                download="Andhika_Nugroho_CV_Resume.pdf"
+                className="group/cv inline-flex w-full max-w-xs md:max-w-sm items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4 font-mono text-[9px] md:text-[10px] font-bold uppercase tracking-[0.25em] text-white/45 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.07] hover:text-white/85"
+                style={{ boxShadow: `0 0 28px ${themeColor}10` }}
+              >
+                <Download
+                  size={16}
+                  className="transition-transform duration-300 group-hover/cv:translate-y-0.5"
+                  style={{ color: themeColor }}
+                />
+                <span>Download CV Andhika</span>
+              </a>
 
               {/* Status indicator */}
               <div className="flex items-center gap-2.5 px-6 py-2.5 rounded-full border border-white/8 bg-white/[0.02]">
