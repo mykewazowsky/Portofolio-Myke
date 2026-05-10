@@ -1421,7 +1421,7 @@ function ContentModal({ id, language, themeColor, activeConfig, onClose }: Conte
                 <div className="absolute bottom-3 left-3 right-3">
                   <div className="text-[7px] font-mono text-white/40 tracking-[0.25em] uppercase mb-0.5">{copy.authVerified}</div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-bold text-white tracking-wider">ANDHIKA P.</span>
+                    <span className="text-[9px] font-bold text-white tracking-wider">ANDHIKA PRASETYA</span>
                     <div className="h-px w-8" style={{ backgroundColor: themeColor }} />
                   </div>
                 </div>
