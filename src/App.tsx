@@ -21,6 +21,7 @@ import {
 import { CV_DATA } from './data';
 import { useWindowSize } from './hooks';
 import { BrandLogo, LinkedInIcon } from './icons';
+import { CV_CONTENT, LANGUAGES, UI_COPY, type Language } from './i18n';
 import { THEMES, type Theme, type ThemeConfig } from './themes';
 
 type ModalId = 'bio' | 'experience' | 'projects' | 'contact';
@@ -34,11 +35,14 @@ interface MapNodeProps {
   activeConfig: ThemeConfig;
   onClick: () => void;
   useGridLayout: boolean;
+  openLabel: string;
+  ariaLabel: string;
   mobileOrder?: number;
 }
 
 interface ContentModalProps {
   id: ModalId;
+  language: Language;
   themeColor: string;
   activeConfig: ThemeConfig;
   onClose: () => void;
@@ -51,10 +55,19 @@ export default function App() {
   const useGridLayout = width < 1024;
 
   const [theme, setThemeState] = useState<Theme>('hydro');
+  const [language, setLanguage] = useState<Language>(() => {
+    if (typeof window === 'undefined') return 'en';
+    return window.localStorage.getItem('portfolio-language') === 'id' ? 'id' : 'en';
+  });
   const [activeTab, setActiveTab] = useState<ModalId | null>(null);
   const [telemetryPing, setTelemetryPing] = useState(14);
   const [isMuted, setIsMuted] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [isIntroOpen, setIsIntroOpen] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return window.localStorage.getItem('portfolio-intro-dismissed') !== 'true';
+  });
+  const [skipIntro, setSkipIntro] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isStrengthsOpen, setIsStrengthsOpen] = useState(false);
   const [headerHeight, setHeaderHeight] = useState(140);
@@ -92,6 +105,15 @@ export default function App() {
     setActiveTab(tab);
     playSound('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
     if (!hasInteracted) setHasInteracted(true);
+  };
+
+  const handleEnterPortfolio = () => {
+    if (skipIntro) {
+      window.localStorage.setItem('portfolio-intro-dismissed', 'true');
+    }
+    setIsIntroOpen(false);
+    setHasInteracted(true);
+    playSound('https://assets.mixkit.co/active_storage/sfx/2570/2570-preview.mp3');
   };
 
   // Background Audio Controller
@@ -160,6 +182,14 @@ export default function App() {
 
   const activeColor = THEMES[theme].color;
   const activeConfig = THEMES[theme];
+  const copy = UI_COPY[language];
+  const themeCopy = copy.themes[theme];
+  const nodeCopy = copy.nodes[theme];
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+    window.localStorage.setItem('portfolio-language', language);
+  }, [language]);
 
   return (
     <div className="relative h-screen w-full select-none overflow-hidden bg-[#080a0b] text-white selection:bg-white/20 transition-colors duration-700 font-sans">
@@ -259,6 +289,111 @@ export default function App() {
         </motion.div>
       </div>
 
+      <AnimatePresence>
+        {isIntroOpen && (
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="intro-title"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[120] flex items-center justify-center bg-[#080a0b]/76 p-5 backdrop-blur-xl"
+          >
+            <motion.div
+              initial={{ y: 24, scale: 0.96, opacity: 0 }}
+              animate={{ y: 0, scale: 1, opacity: 1 }}
+              exit={{ y: 16, scale: 0.98, opacity: 0 }}
+              transition={{ duration: 0.45, ease: 'easeOut' }}
+              className={`relative w-full max-w-[560px] overflow-hidden border border-white/10 bg-[#0a0b0c]/94 p-6 md:p-8 text-center shadow-[0_30px_80px_rgba(0,0,0,0.78)] ${activeConfig.shape}`}
+              style={{
+                borderTop: `4px solid ${activeColor}`,
+                boxShadow: `0 30px 80px rgba(0,0,0,0.78), 0 0 56px ${activeColor}14`,
+              }}
+            >
+              <div
+                className="absolute inset-x-0 top-0 h-px opacity-80"
+                style={{ background: `linear-gradient(90deg, transparent, ${activeColor}, transparent)` }}
+              />
+              <div className="absolute right-[-3rem] top-[-3rem] opacity-[0.04]">
+                <Compass size={220} />
+              </div>
+
+              <div className="relative mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.035]" style={{ color: activeColor }}>
+                <BrandLogo className="h-12 w-12" />
+                <div className="absolute inset-[-10px] rounded-[1.35rem] border border-dashed border-white/10 animate-spin-slow" style={{ animationDuration: '18s' }} />
+              </div>
+
+              <div className="relative mb-4 flex justify-center">
+                <div className="flex gap-1 rounded-xl border border-white/10 bg-black/25 p-1" role="group" aria-label={copy.introLanguageLabel}>
+                  {(Object.keys(LANGUAGES) as Language[]).map((lang) => {
+                    const isActive = language === lang;
+                    return (
+                      <button
+                        key={lang}
+                        type="button"
+                        aria-label={LANGUAGES[lang].ariaLabel}
+                        aria-pressed={isActive}
+                        onClick={() => setLanguage(lang)}
+                        className={`relative min-w-9 rounded-lg px-2.5 py-1.5 font-mono text-[10px] font-black tracking-[0.14em] transition-colors ${
+                          isActive ? 'text-[#080a0b]' : 'text-white/35 hover:text-white/75'
+                        }`}
+                      >
+                        {isActive && (
+                          <motion.div
+                            layoutId="intro-active-language"
+                            className="absolute inset-0 rounded-lg"
+                            style={{ backgroundColor: activeColor }}
+                            transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
+                          />
+                        )}
+                        <span className="relative z-10">{LANGUAGES[lang].label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <p className="relative mb-2 font-mono text-[9px] font-bold uppercase tracking-[0.36em] text-white/32">
+                {copy.introEyebrow}
+              </p>
+              <h2 id="intro-title" className="relative text-2xl md:text-4xl font-black uppercase leading-tight tracking-tight" style={{ color: activeColor }}>
+                {copy.introTitle}
+              </h2>
+              <p className="relative mt-2 font-mono text-[10px] md:text-xs font-bold uppercase tracking-[0.22em] text-white/45">
+                {copy.introSubtitle}
+              </p>
+              <p className="relative mx-auto mt-5 max-w-md text-sm md:text-base leading-relaxed text-white/62">
+                {copy.introDescription}
+              </p>
+
+              <div className="relative mt-7 flex flex-col items-center gap-4">
+                <button
+                  type="button"
+                  onClick={handleEnterPortfolio}
+                  className="group/enter inline-flex w-full max-w-xs items-center justify-center gap-3 rounded-xl px-5 py-3.5 font-mono text-[10px] font-black uppercase tracking-[0.24em] text-[#080a0b] transition-all duration-300 hover:-translate-y-0.5"
+                  style={{ backgroundColor: activeColor, boxShadow: `0 0 34px ${activeColor}30` }}
+                >
+                  <span>{copy.introEnter}</span>
+                  <ArrowRight size={14} className="transition-transform duration-300 group-hover/enter:translate-x-1" />
+                </button>
+
+                <label className="flex cursor-pointer items-center gap-2 font-mono text-[9px] uppercase tracking-[0.18em] text-white/35 transition-colors hover:text-white/65">
+                  <input
+                    type="checkbox"
+                    checked={skipIntro}
+                    onChange={(event) => setSkipIntro(event.target.checked)}
+                    className="h-3.5 w-3.5 accent-current"
+                    style={{ color: activeColor }}
+                  />
+                  {copy.introSkip}
+                </label>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <header ref={headerRef} className="fixed top-0 z-50 flex w-full flex-col gap-3 p-4 md:p-6 md:flex-row md:items-center md:justify-between lg:px-10 lg:py-6 pointer-events-none">
         <motion.div 
@@ -281,12 +416,12 @@ export default function App() {
               className="text-3xl font-bold tracking-tight md:text-5xl lg:text-7xl xl:text-8xl uppercase"
               style={{ color: activeColor, textShadow: `0 0 35px ${activeColor}33`, fontWeight: 700 }}
             >
-              Hello!
+              {copy.hello}
             </h1>
           </div>
           <div className="mt-1 flex items-center gap-1.5 md:gap-3 font-mono text-[8px] md:text-[11px] font-medium tracking-[0.2em] md:tracking-[0.4em] text-white/40">
             <div className="h-1 w-1 rounded-full animate-pulse shadow-lg" style={{ backgroundColor: activeColor, boxShadow: `0 0 8px ${activeColor}` }} />
-            {activeConfig.subtext.toUpperCase()}
+            {themeCopy.subtext.toUpperCase()}
           </div>
         </motion.div>
 
@@ -294,7 +429,7 @@ export default function App() {
         <div className="flex items-center gap-2 md:gap-3 self-center pointer-events-auto">
           <button 
             type="button"
-            aria-label={isMuted ? 'Enable interface sound' : 'Mute interface sound'}
+            aria-label={isMuted ? copy.soundOffAria : copy.soundOnAria}
             aria-pressed={!isMuted}
             onClick={() => {
               setIsMuted(!isMuted);
@@ -307,7 +442,39 @@ export default function App() {
             {isMuted ? <VolumeX size={16} className="md:w-5 md:h-5" /> : <Volume2 size={16} className="md:w-5 md:h-5" />}
           </button>
 
-          <div className="relative flex gap-1 p-1 bg-[#0a0b0c]/80 backdrop-blur-3xl border border-white/10 rounded-xl md:rounded-2xl overflow-x-auto max-w-[85vw] md:max-w-full shadow-2xl scrollbar-hide">
+          <div className="relative flex gap-1 p-1 bg-[#0a0b0c]/80 backdrop-blur-3xl border border-white/10 rounded-xl md:rounded-2xl shadow-2xl" role="group" aria-label="Language selector">
+            {(Object.keys(LANGUAGES) as Language[]).map((lang) => {
+              const isActive = language === lang;
+              return (
+                <button
+                  key={lang}
+                  type="button"
+                  aria-label={LANGUAGES[lang].ariaLabel}
+                  aria-pressed={isActive}
+                  onClick={() => {
+                    setLanguage(lang);
+                    if (!hasInteracted) setHasInteracted(true);
+                    playSound('https://assets.mixkit.co/active_storage/sfx/2570/2570-preview.mp3');
+                  }}
+                  className={`relative z-10 min-w-8 md:min-w-10 rounded-lg md:rounded-xl px-2 py-2 md:px-3 md:py-3 font-mono text-[9px] md:text-[11px] font-black tracking-[0.12em] transition-all ${
+                    isActive ? 'text-[#080a0b]' : 'text-white/35 hover:bg-white/5 hover:text-white/75'
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="active-language"
+                      className="absolute inset-0 rounded-lg md:rounded-xl"
+                      style={{ backgroundColor: activeColor }}
+                      transition={{ type: 'spring', bounce: 0.2, duration: 0.45 }}
+                    />
+                  )}
+                  <span className="relative z-10">{LANGUAGES[lang].label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="relative flex gap-1 p-1 bg-[#0a0b0c]/80 backdrop-blur-3xl border border-white/10 rounded-xl md:rounded-2xl overflow-x-auto max-w-[48vw] sm:max-w-[58vw] md:max-w-full shadow-2xl scrollbar-hide">
             {(Object.keys(THEMES) as Theme[]).map((t) => {
             const Icon = THEMES[t].icon;
             const isActive = theme === t;
@@ -315,7 +482,7 @@ export default function App() {
               <button
                 key={t}
                 type="button"
-                aria-label={`Switch to ${THEMES[t].label} mode`}
+                aria-label={copy.switchThemeAria(THEMES[t].label)}
                 aria-pressed={isActive}
                 onClick={() => setTheme(t)}
                 className={`relative flex flex-col md:flex-row items-center justify-center gap-0.5 md:gap-3 px-2 md:px-10 py-2 md:py-3 font-mono text-[9px] md:text-[12px] font-bold tracking-[0.05em] md:tracking-[0.15em] transition-all rounded-lg md:rounded-xl whitespace-nowrap z-10 min-w-0 flex-shrink ${
@@ -347,7 +514,7 @@ export default function App() {
 
           <button 
             type="button"
-            aria-label={isStrengthsOpen ? 'Close core advantage details' : 'Open core advantage details'}
+            aria-label={isStrengthsOpen ? copy.strengthsCloseAria : copy.strengthsOpenAria}
             aria-expanded={isStrengthsOpen}
             onClick={() => setIsStrengthsOpen(!isStrengthsOpen)}
             className="lg:hidden p-2 md:p-3 bg-[#0a0b0c]/80 backdrop-blur-3xl border border-white/10 rounded-xl md:rounded-2xl text-white/40 hover:text-white hover:border-white/20 transition-all shadow-xl"
@@ -383,7 +550,7 @@ export default function App() {
           <div className="flex items-center gap-4 mb-2 group">
             <div className="flex flex-col items-end">
               <div className="text-[11px] font-black tracking-widest text-white/80 group-hover:text-white transition-colors">ANDHIKA PRASETYA</div>
-              <div className="text-[9px] font-mono font-medium text-white/20 group-hover:text-white/40 transition-colors">IDENT_STATUS: VERIFIED</div>
+              <div className="text-[9px] font-mono font-medium text-white/20 group-hover:text-white/40 transition-colors">{copy.identityStatus}</div>
             </div>
             <div className={`relative h-14 w-14 border border-white/20 bg-white/5 overflow-hidden transition-all duration-500 group-hover:border-white/40 group-hover:scale-105 shadow-2xl ${activeConfig.shape}`}
                  style={{ boxShadow: `0 0 25px ${activeColor}22` }}>
@@ -409,7 +576,7 @@ export default function App() {
           </div>
           <div className="flex items-center gap-2 font-mono text-[9px] text-white/30 tracking-[0.2em]">
             <span className="w-1 h-1 rounded-full bg-blue-400 animate-ping" />
-            SYS_CMD: BOOT_COMPLETE
+            {copy.systemReady}
           </div>
         </motion.div>
       </header>
@@ -474,49 +641,57 @@ export default function App() {
           <div className={useGridLayout ? `grid grid-cols-2 gap-x-4 gap-y-6 md:gap-8 w-full px-4 md:max-w-lg mx-auto pb-28 ${isTablet && !isMobile ? 'pt-8' : ''}` : "relative h-full w-full"}>
             <MapNode 
               position={useGridLayout ? undefined : { top: '42%', left: 'clamp(190px, 24%, 310px)' }}
-              label={theme === 'hydro' ? "Sonar Origin" : theme === 'gis' ? "Root Node" : theme === 'land' ? "Station 001" : "Base Geoid"}
+              label={nodeCopy.bio}
               sec={`${activeConfig.labelPrefix}.01 // BIO`}
               icon={<MapPin size={28} />}
               themeColor={activeColor}
               activeConfig={activeConfig}
               onClick={() => handleOpenTab('bio')}
               useGridLayout={useGridLayout}
+              openLabel={copy.open}
+              ariaLabel={copy.openNodeAria(nodeCopy.bio)}
               mobileOrder={1}
             />
 
             <MapNode 
               position={useGridLayout ? undefined : { top: '61%', left: '38%' }}
-              label={theme === 'hydro' ? "Sounding Dept" : theme === 'gis' ? "Logic Layer" : theme === 'land' ? "Field Grid" : "Prec Bench"}
+              label={nodeCopy.history}
               sec={`${activeConfig.labelPrefix}.02 // HIST`}
               icon={<History size={28} />}
               themeColor={activeColor}
               activeConfig={activeConfig}
               onClick={() => handleOpenTab('experience')}
               useGridLayout={useGridLayout}
+              openLabel={copy.open}
+              ariaLabel={copy.openNodeAria(nodeCopy.history)}
               mobileOrder={2}
             />
 
             <MapNode 
               position={useGridLayout ? undefined : { top: '34%', left: '57%' }}
-              label={theme === 'hydro' ? "Wreck Data" : theme === 'gis' ? "Geo Registry" : theme === 'land' ? "Site Plan" : "Sat Link"}
+              label={nodeCopy.data}
               sec={`${activeConfig.labelPrefix}.03 // DATA`}
               icon={<LayoutDashboard size={28} />}
               themeColor={activeColor}
               activeConfig={activeConfig}
               onClick={() => handleOpenTab('projects')}
               useGridLayout={useGridLayout}
+              openLabel={copy.open}
+              ariaLabel={copy.openNodeAria(nodeCopy.data)}
               mobileOrder={3}
             />
 
             <MapNode 
               position={useGridLayout ? undefined : { top: '54%', left: 'clamp(70%, 74%, calc(100% - 180px))' }}
-              label={theme === 'hydro' ? "Comms Buoy" : theme === 'gis' ? "API Portal" : theme === 'land' ? "Heliport" : "Ref Center"}
+              label={nodeCopy.contact}
               sec={`${activeConfig.labelPrefix}.04 // COMM`}
               icon={<Satellite size={28} />}
               themeColor={activeColor}
               activeConfig={activeConfig}
               onClick={() => handleOpenTab('contact')}
               useGridLayout={useGridLayout}
+              openLabel={copy.open}
+              ariaLabel={copy.openNodeAria(nodeCopy.contact)}
               mobileOrder={4}
             />
           </div>
@@ -544,9 +719,9 @@ export default function App() {
             />
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
-                <div className="font-mono text-[8px] font-bold tracking-[0.28em] text-white/35 uppercase">CORE_ADVANTAGE</div>
+                <div className="font-mono text-[8px] font-bold tracking-[0.28em] text-white/35 uppercase">{copy.coreAdvantage}</div>
                 <h3 className="mt-1 text-base xl:text-lg font-black tracking-tight uppercase leading-tight" style={{ color: activeColor }}>
-                  {activeConfig.strengths.title}
+                  {themeCopy.strengths.title}
                 </h3>
               </div>
               <div
@@ -557,10 +732,10 @@ export default function App() {
               </div>
             </div>
 
-            <p className="text-[10px] xl:text-[11px] text-white/50 mb-3.5 leading-relaxed font-medium">{activeConfig.strengths.description}</p>
+            <p className="text-[10px] xl:text-[11px] text-white/50 mb-3.5 leading-relaxed font-medium">{themeCopy.strengths.description}</p>
 
             <div className="grid gap-1.5">
-              {activeConfig.strengths.points.map((pt, i) => (
+              {themeCopy.strengths.points.map((pt, i) => (
                 <div key={i} className="flex items-center gap-2 rounded-md border border-white/[0.04] bg-white/[0.025] px-2.5 py-1.5">
                   <div className="h-1 w-1 rounded-full flex-shrink-0" style={{ backgroundColor: activeColor }} />
                   <span className="text-[8px] xl:text-[9px] font-mono font-bold text-white/65 tracking-[0.14em] uppercase leading-tight">{pt}</span>
@@ -569,8 +744,8 @@ export default function App() {
             </div>
 
             <div className="mt-4 pt-3 border-t border-white/10">
-              <div className="text-[7px] xl:text-[8px] font-mono text-white/30 tracking-[0.2em] mb-1">EQUIPMENT_STACK</div>
-              <div className="text-[9px] xl:text-[10px] font-bold text-white/60 tracking-tight leading-snug">{activeConfig.strengths.equipment}</div>
+              <div className="text-[7px] xl:text-[8px] font-mono text-white/30 tracking-[0.2em] mb-1">{copy.equipmentStack}</div>
+              <div className="text-[9px] xl:text-[10px] font-bold text-white/60 tracking-tight leading-snug">{themeCopy.strengths.equipment}</div>
             </div>
             
             <div className="mt-4 flex justify-between items-center opacity-20">
@@ -597,12 +772,12 @@ export default function App() {
               <div className="w-12 h-1.5 bg-white/10 rounded-full" onClick={() => setIsStrengthsOpen(false)} />
             </div>
             
-            <div className="mb-2 font-mono text-[10px] font-bold tracking-[0.3em] text-white/40 uppercase">CORE_ADVANTAGE</div>
-            <h3 className="text-2xl font-black mb-2 tracking-tight uppercase" style={{ color: activeColor }}>{activeConfig.strengths.title}</h3>
-            <p className="text-[12px] text-white/50 mb-6 leading-relaxed font-medium">{activeConfig.strengths.description}</p>
+            <div className="mb-2 font-mono text-[10px] font-bold tracking-[0.3em] text-white/40 uppercase">{copy.coreAdvantage}</div>
+            <h3 className="text-2xl font-black mb-2 tracking-tight uppercase" style={{ color: activeColor }}>{themeCopy.strengths.title}</h3>
+            <p className="text-[12px] text-white/50 mb-6 leading-relaxed font-medium">{themeCopy.strengths.description}</p>
 
             <div className="space-y-3">
-              {activeConfig.strengths.points.map((pt, i) => (
+              {themeCopy.strengths.points.map((pt, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <div className="w-2 h-[1px] bg-current" style={{ color: activeColor }} />
                   <span className="text-[11px] font-mono font-bold text-white/70 tracking-widest uppercase">{pt}</span>
@@ -611,8 +786,8 @@ export default function App() {
             </div>
 
             <div className="mt-8 pt-4 border-t border-white/10">
-              <div className="text-[9px] font-mono text-white/30 tracking-[0.2em] mb-1">EQUIPMENT_STACK</div>
-              <div className="text-[11px] font-bold text-white/60 tracking-tight">{activeConfig.strengths.equipment}</div>
+              <div className="text-[9px] font-mono text-white/30 tracking-[0.2em] mb-1">{copy.equipmentStack}</div>
+              <div className="text-[11px] font-bold text-white/60 tracking-tight">{themeCopy.strengths.equipment}</div>
             </div>
             
             <button 
@@ -620,7 +795,7 @@ export default function App() {
               onClick={() => setIsStrengthsOpen(false)}
               className="mt-8 w-full py-4 rounded-xl border border-white/10 bg-white/5 font-mono text-[10px] font-bold tracking-[0.3em] text-white/40 uppercase"
             >
-              CLOSE_DETAILS
+              {copy.closeDetails}
             </button>
           </motion.div>
         )}
@@ -677,6 +852,7 @@ export default function App() {
         {activeTab && (
           <ContentModal 
             id={activeTab} 
+            language={language}
             themeColor={activeColor} 
             activeConfig={activeConfig}
             onClose={() => setActiveTab(null)} 
@@ -687,7 +863,7 @@ export default function App() {
   );
 }
 
-function MapNode({ position, label, sec, icon, themeColor, activeConfig, onClick, useGridLayout }: MapNodeProps) {
+function MapNode({ position, label, sec, icon, themeColor, activeConfig, onClick, useGridLayout, openLabel, ariaLabel }: MapNodeProps) {
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== 'Enter' && event.key !== ' ') return;
     event.preventDefault();
@@ -700,7 +876,7 @@ function MapNode({ position, label, sec, icon, themeColor, activeConfig, onClick
       className={`${useGridLayout ? 'relative col-span-1 w-full' : 'absolute -translate-x-1/2 -translate-y-1/2'} flex flex-col items-center group cursor-pointer z-20`}
       role="button"
       tabIndex={0}
-      aria-label={`Open ${label} details`}
+      aria-label={ariaLabel}
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       whileHover={{ scale: 1.04 }}
@@ -797,7 +973,7 @@ function MapNode({ position, label, sec, icon, themeColor, activeConfig, onClick
         {/* OPEN indicator — slides in on hover */}
         <div className="flex items-center gap-1 mt-1 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
           <span className="font-mono text-[7px] font-bold tracking-[0.2em] uppercase" style={{ color: themeColor }}>
-            OPEN
+            {openLabel}
           </span>
           <ArrowRight size={7} style={{ color: themeColor }} />
         </div>
@@ -806,8 +982,10 @@ function MapNode({ position, label, sec, icon, themeColor, activeConfig, onClick
   );
 }
 
-function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalProps) {
+function ContentModal({ id, language, themeColor, activeConfig, onClose }: ContentModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const copy = UI_COPY[language];
+  const cv = CV_CONTENT[language];
 
   const handleClose = () => {
     const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2569/2569-preview.mp3');
@@ -859,7 +1037,7 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalPro
         </div>
         <button
           type="button"
-          aria-label="Close details"
+          aria-label={copy.modalCloseAria}
           onClick={handleClose}
           className="absolute top-4 right-4 md:top-5 md:right-5 group/close z-50 flex items-center gap-2 px-2 py-2 md:px-3 rounded-xl border border-white/8 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 transition-all duration-200"
         >
@@ -883,7 +1061,7 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalPro
                   </div>
                 </div>
 
-                <div className="mb-2 font-mono text-[8px] md:text-[10px] font-bold tracking-[0.4em] text-white/30 uppercase">SUBJECT_IDENTIFIER</div>
+                <div className="mb-2 font-mono text-[8px] md:text-[10px] font-bold tracking-[0.4em] text-white/30 uppercase">{copy.subjectIdentifier}</div>
                 <h2
                   id="content-modal-title"
                   className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight uppercase leading-none"
@@ -893,7 +1071,7 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalPro
                 </h2>
                 <div className="h-px w-16 md:w-24 mb-5 md:mb-7" style={{ backgroundColor: themeColor }} />
                 <p className="text-sm md:text-base lg:text-lg text-white/70 leading-relaxed tracking-tight clear-both md:clear-none max-w-lg">
-                  {CV_DATA.profile.summary}
+                  {cv.profile.summary}
                 </p>
               </div>
 
@@ -918,7 +1096,7 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalPro
                   <div className="h-6 w-px bg-white/10" />
                 </div>
                 <div className="absolute bottom-3 left-3 right-3">
-                  <div className="text-[7px] font-mono text-white/40 tracking-[0.25em] uppercase mb-0.5">AUTH // ID_VERIFIED</div>
+                  <div className="text-[7px] font-mono text-white/40 tracking-[0.25em] uppercase mb-0.5">{copy.authVerified}</div>
                   <div className="flex items-center justify-between">
                     <span className="text-[9px] font-bold text-white tracking-wider">ANDHIKA P.</span>
                     <div className="h-px w-8" style={{ backgroundColor: themeColor }} />
@@ -933,9 +1111,9 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalPro
               <div className="rounded-xl p-5 md:p-6 border border-white/8 bg-white/[0.02]" style={{ borderLeft: `3px solid ${themeColor}55` }}>
                 <h4 className="font-mono text-[8px] md:text-[9px] text-white/35 mb-4 tracking-[0.35em] flex items-center gap-2 uppercase">
                   <div className="w-1 h-1 rounded-full" style={{ backgroundColor: themeColor }} />
-                  Academic_Record
+                  {copy.academicRecord}
                 </h4>
-                {CV_DATA.education.map((edu, i) => (
+                {cv.education.map((edu, i) => (
                   <div key={i} className="space-y-1.5 md:space-y-2">
                     <p className="font-bold text-base md:text-lg leading-tight">{edu.institution}</p>
                     <p className="text-xs md:text-sm font-medium" style={{ color: themeColor }}>{edu.degree}</p>
@@ -948,7 +1126,7 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalPro
 
               {/* Comm channels */}
               <div className="rounded-xl p-5 md:p-6 border border-white/8 bg-white/[0.02] flex flex-col gap-3" style={{ borderLeft: `3px solid ${themeColor}33` }}>
-                <h4 className="font-mono text-[8px] md:text-[9px] text-white/35 tracking-[0.35em] uppercase">Comm_Channels</h4>
+                <h4 className="font-mono text-[8px] md:text-[9px] text-white/35 tracking-[0.35em] uppercase">{copy.commChannels}</h4>
                 {[
                   { href: `mailto:${CV_DATA.profile.email}`, icon: <Mail size={15} style={{ color: themeColor }} />, label: CV_DATA.profile.email },
                   { href: CV_DATA.profile.linkedinUrl, icon: <LinkedInIcon size={15} style={{ color: themeColor }} />, label: 'LinkedIn Profile', external: true },
@@ -981,8 +1159,8 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalPro
             <div className="space-y-6 md:space-y-8">
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 pb-4 border-b border-white/8">
                 <div>
-                  <p className="font-mono text-[8px] md:text-[9px] text-white/25 mb-1 uppercase tracking-[0.3em]">Primary Professional Records</p>
-                  <h2 id="content-modal-title" className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight" style={{ color: themeColor }}>Work History</h2>
+                  <p className="font-mono text-[8px] md:text-[9px] text-white/25 mb-1 uppercase tracking-[0.3em]">{copy.workHistoryEyebrow}</p>
+                  <h2 id="content-modal-title" className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight" style={{ color: themeColor }}>{copy.workHistoryTitle}</h2>
                 </div>
                 <div className="font-mono text-[8px] text-white/20 tracking-widest whitespace-nowrap bg-white/[0.04] border border-white/8 px-2.5 py-1 rounded-md">
                   TIMELINE_LOG // V.01
@@ -990,7 +1168,7 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalPro
               </div>
 
               <div className="space-y-5 md:space-y-7">
-                {CV_DATA.experience.map((exp, i) => (
+                {cv.experience.map((exp, i) => (
                   <div key={i} className="relative pl-7 md:pl-10 group">
                     {/* Timeline line */}
                     <div
@@ -1039,13 +1217,13 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalPro
             <div className="space-y-6 md:space-y-8">
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 pb-4 border-b border-white/8">
                 <div>
-                  <p className="font-mono text-[8px] md:text-[9px] text-white/25 mb-1 uppercase tracking-[0.3em]">Organizational Contribution</p>
-                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight" style={{ color: themeColor }}>Leadership</h2>
+                  <p className="font-mono text-[8px] md:text-[9px] text-white/25 mb-1 uppercase tracking-[0.3em]">{copy.leadershipEyebrow}</p>
+                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight" style={{ color: themeColor }}>{copy.leadershipTitle}</h2>
                 </div>
               </div>
 
               <div className="space-y-5 md:space-y-7">
-                {CV_DATA.organizations.map((org, i) => (
+                {cv.organizations.map((org, i) => (
                   <div key={i} className="relative pl-7 md:pl-10 group">
                     <div
                       className="absolute left-[7px] md:left-[9px] top-5 bottom-[-20px] w-px"
@@ -1093,8 +1271,8 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalPro
         {id === 'projects' && (
           <div className="space-y-6 md:space-y-8">
             <div>
-              <p className="font-mono text-[8px] md:text-[9px] text-white/25 mb-1.5 uppercase tracking-[0.3em]">Capabilities & Tools</p>
-              <h2 id="content-modal-title" className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight" style={{ color: themeColor }}>Tech Stack</h2>
+              <p className="font-mono text-[8px] md:text-[9px] text-white/25 mb-1.5 uppercase tracking-[0.3em]">{copy.techStackEyebrow}</p>
+              <h2 id="content-modal-title" className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight" style={{ color: themeColor }}>{copy.techStackTitle}</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
@@ -1102,10 +1280,10 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalPro
               <div className="border border-white/8 bg-white/[0.02] rounded-xl p-5 md:p-6" style={{ borderTop: `2px solid ${themeColor}55` }}>
                 <div className="flex items-center gap-2 mb-4">
                   <Satellite size={14} style={{ color: themeColor }} />
-                  <h3 className="font-mono text-[9px] md:text-[10px] font-bold tracking-[0.3em] text-white/40 uppercase">Field_Expertise</h3>
+                  <h3 className="font-mono text-[9px] md:text-[10px] font-bold tracking-[0.3em] text-white/40 uppercase">{copy.fieldExpertise}</h3>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {CV_DATA.skills.technical.map((s, i) => (
+                  {cv.skills.technical.map((s, i) => (
                     <span
                       key={i}
                       className="text-[10px] md:text-[11px] px-2.5 py-1 md:px-3 md:py-1.5 bg-black/30 border border-white/8 hover:border-white/20 rounded-lg text-white/60 hover:text-white/90 transition-all duration-200 cursor-default"
@@ -1120,10 +1298,10 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalPro
               <div className="border border-white/8 bg-white/[0.02] rounded-xl p-5 md:p-6" style={{ borderTop: `2px solid ${themeColor}33` }}>
                 <div className="flex items-center gap-2 mb-4">
                   <LayoutDashboard size={14} style={{ color: themeColor }} />
-                  <h3 className="font-mono text-[9px] md:text-[10px] font-bold tracking-[0.3em] text-white/40 uppercase">System_Tools</h3>
+                  <h3 className="font-mono text-[9px] md:text-[10px] font-bold tracking-[0.3em] text-white/40 uppercase">{copy.systemTools}</h3>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {CV_DATA.skills.tools.map((t, i) => (
+                  {cv.skills.tools.map((t, i) => (
                     <span
                       key={i}
                       className="text-[10px] md:text-[11px] px-2.5 py-1 md:px-3 md:py-1.5 bg-black/30 border rounded-lg font-medium hover:bg-white/[0.04] transition-all duration-200 cursor-default"
@@ -1151,14 +1329,14 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalPro
               <div className="relative p-6 md:p-8 lg:p-10">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: themeColor }} />
-                  <span className="font-mono text-[8px] md:text-[9px] text-white/30 tracking-[0.35em] uppercase">Research_Thesis</span>
+                  <span className="font-mono text-[8px] md:text-[9px] text-white/30 tracking-[0.35em] uppercase">{copy.researchThesis}</span>
                 </div>
                 <h3 className="font-bold text-lg md:text-xl lg:text-2xl mb-3 leading-tight text-white/90">
-                  Spatial Information Systems for Disaster Mitigation
+                  {copy.researchTitle}
                 </h3>
                 <div className="h-px w-12 mb-4" style={{ backgroundColor: `${themeColor}66` }} />
                 <p className="text-xs md:text-sm text-white/45 leading-relaxed italic max-w-xl">
-                  {CV_DATA.education[0].thesis}
+                  {cv.education[0].thesis}
                 </p>
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-2 font-mono text-[8px] md:text-[9px] uppercase tracking-[0.28em] text-white/25">
@@ -1172,7 +1350,7 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalPro
                     className="group/thesis inline-flex w-fit items-center gap-2 rounded-lg border border-white/10 bg-black/30 px-3.5 py-2 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/55 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.06] hover:text-white"
                     style={{ boxShadow: `0 0 24px ${themeColor}10` }}
                   >
-                    <span>Open System</span>
+                    <span>{copy.openSystem}</span>
                     <ExternalLink
                       size={13}
                       className="transition-transform duration-300 group-hover/thesis:translate-x-0.5 group-hover/thesis:-translate-y-0.5"
@@ -1188,8 +1366,8 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalPro
         {id === 'contact' && (
           <div className="space-y-6 md:space-y-8 py-2 md:py-3 text-center">
             <div className="space-y-1 md:space-y-2">
-              <p className="font-mono text-[8px] md:text-[9px] text-white/25 tracking-[0.4em] uppercase mb-2">Awaiting_Comm_Link</p>
-              <h2 id="content-modal-title" className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight" style={{ color: themeColor }}>Get In Touch</h2>
+              <p className="font-mono text-[8px] md:text-[9px] text-white/25 tracking-[0.4em] uppercase mb-2">{copy.contactEyebrow}</p>
+              <h2 id="content-modal-title" className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight" style={{ color: themeColor }}>{copy.contactTitle}</h2>
             </div>
 
             <div className="flex flex-col items-center gap-6 md:gap-8">
@@ -1254,14 +1432,14 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalPro
                   className="transition-transform duration-300 group-hover/cv:translate-y-0.5"
                   style={{ color: themeColor }}
                 />
-                <span>Download CV Andhika</span>
+                <span>{copy.downloadCv}</span>
               </a>
 
               {/* Status indicator */}
               <div className="flex items-center gap-2.5 px-6 py-2.5 rounded-full border border-white/8 bg-white/[0.02]">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
                 <p className="text-white/35 font-mono text-[8px] md:text-[9px] tracking-[0.2em] uppercase">
-                  Transmission Stable // No Drop
+                  {copy.transmission}
                 </p>
               </div>
             </div>

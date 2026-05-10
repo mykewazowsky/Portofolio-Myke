@@ -15,6 +15,8 @@ Portofolio ini dirancang sebagai media presentasi profesional untuk memperkenalk
 Fitur utama:
 
 - Mode visual interaktif untuk Hydro, GIS, Survey, dan Geo Precision
+- Intro boot screen yang menjelaskan web portfolio saat pertama dibuka
+- Toggle bahasa EN/ID dengan preferensi tersimpan di browser
 - Profil personal dengan nuansa geospatial command interface
 - Riwayat pengalaman kerja, organisasi, dan technical stack
 - Logo personal yang mengikuti warna tema aktif
@@ -54,6 +56,7 @@ Portofolio-Web/
 |   |-- data.ts
 |   |-- hooks.ts
 |   |-- icons.tsx
+|   |-- i18n.ts
 |   |-- index.css
 |   |-- main.tsx
 |   `-- themes.tsx
