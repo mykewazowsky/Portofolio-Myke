@@ -61,6 +61,7 @@ interface MapNodeProps {
   openLabel: string;
   ariaLabel: string;
   mobileOrder?: number;
+  tooltipSide?: 'below' | 'left' | 'right';
 }
 
 interface ContentModalProps {
@@ -441,7 +442,7 @@ export default function App() {
                       >
                         {isActive && (
                           <motion.div
-                            layoutId="intro-active-language"
+                            layoutId="active-language"
                             className="absolute inset-0 rounded-lg"
                             style={{ backgroundColor: activeColor }}
                             transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
@@ -526,7 +527,7 @@ export default function App() {
         </motion.div>
 
         {/* Mode Selector */}
-        <div className="flex items-center gap-1.5 md:gap-2 self-center pointer-events-auto">
+        <div className="flex w-full items-center justify-center gap-1 self-center pointer-events-auto sm:gap-1.5 md:w-auto md:justify-start md:gap-2">
           <button 
             type="button"
             aria-label={isMuted ? copy.soundOffAria : copy.soundOnAria}
@@ -683,64 +684,64 @@ export default function App() {
 
       {/* Main Interactive Viewport */}
       <main className="relative h-full w-full" style={{ paddingTop: useGridLayout ? headerHeight : 0 }}>
-        {/* Enhanced Connection Lines (SVG) - Hidden on mobile/tablet for performance and clarity */}
-        {!useGridLayout && (
-          <svg className="absolute inset-0 h-full w-full pointer-events-none z-10" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <defs>
-              <filter id="glow">
-                <feGaussianBlur stdDeviation="0.5" result="coloredBlur" />
-                <feMerge>
-                  <feMergeNode in="coloredBlur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
-            
-            {/* Updated Route Line for optimized non-colliding topology */}
-            <motion.path
-              d="M 24 42 L 38 61 L 57 34 L 74 54"
-              fill="none"
-              stroke={activeColor}
-              strokeWidth="0.15"
-              strokeDasharray="1.5 1"
-              className="opacity-40"
-              style={{ filter: 'url(#glow)' }}
-              animate={{ strokeDashoffset: [0, -10] }}
-              transition={{ repeat: Infinity, duration: 5, ease: "linear" }}
-            />
-
-            {/* Secondary Glow Path */}
-            <path
-              d="M 24 42 L 38 61 L 57 34 L 74 54"
-              fill="none"
-              stroke={activeColor}
-              strokeWidth="0.05"
-              className="opacity-10"
-            />
-
-            {/* Moving Data Packets */}
-            <motion.circle r="0.3" fill={activeColor} className="shadow-lg">
-              <animateMotion 
-                dur="6s" 
-                repeatCount="indefinite" 
-                path="M 24 42 L 38 61 L 57 34 L 74 54"
-              />
-            </motion.circle>
-            <motion.circle r="0.3" fill={activeColor}>
-              <animateMotion 
-                dur="6s" 
-                begin="3s"
-                repeatCount="indefinite" 
-                path="M 24 42 L 38 61 L 57 34 L 74 54"
-              />
-            </motion.circle>
-          </svg>
-        )}
-
         <div className={`relative h-full w-full max-w-[1400px] mx-auto ${useGridLayout ? 'flex items-start justify-center overflow-y-auto overflow-x-hidden' : ''}`}>
-          <div className={useGridLayout ? `grid grid-cols-2 gap-x-4 gap-y-6 md:gap-8 w-full px-4 md:max-w-lg mx-auto pb-28 ${isTablet && !isMobile ? 'pt-8' : ''}` : "relative h-full w-full"}>
-            <MapNode 
-              position={useGridLayout ? undefined : { top: '42%', left: 'clamp(190px, 24%, 310px)' }}
+          {/* Enhanced Connection Lines (SVG) - inside same container as nodes so coordinates align */}
+          {!useGridLayout && (
+            <svg className="absolute inset-0 h-full w-full pointer-events-none z-10" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <defs>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="0.5" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              {/* Route line — coords target icon center (Y adjusted above label card) */}
+              <motion.path
+                d="M 27 33 L 40 58 L 64 33 L 70 58"
+                fill="none"
+                stroke={activeColor}
+                strokeWidth="0.15"
+                strokeDasharray="1.5 1"
+                className="opacity-40"
+                style={{ filter: 'url(#glow)' }}
+                animate={{ strokeDashoffset: [0, -10] }}
+                transition={{ repeat: Infinity, duration: 5, ease: "linear" }}
+              />
+
+              {/* Secondary glow path */}
+              <path
+                d="M 27 33 L 40 58 L 64 33 L 70 58"
+                fill="none"
+                stroke={activeColor}
+                strokeWidth="0.05"
+                className="opacity-10"
+              />
+
+              {/* Moving data packets */}
+              <motion.circle r="0.3" fill={activeColor} className="shadow-lg">
+                <animateMotion
+                  dur="6s"
+                  repeatCount="indefinite"
+                  path="M 27 33 L 40 58 L 64 33 L 70 58"
+                />
+              </motion.circle>
+              <motion.circle r="0.3" fill={activeColor}>
+                <animateMotion
+                  dur="6s"
+                  begin="3s"
+                  repeatCount="indefinite"
+                  path="M 27 33 L 40 58 L 64 33 L 70 58"
+                />
+              </motion.circle>
+            </svg>
+          )}
+
+          <div className={useGridLayout ? `grid grid-cols-2 gap-x-4 gap-y-6 md:gap-8 w-full px-4 md:max-w-lg mx-auto pb-56 ${isTablet && !isMobile ? 'pt-8' : ''}` : "relative h-full w-full"}>
+            <MapNode
+              position={useGridLayout ? undefined : { top: '36%', left: 'clamp(270px, 27%, 370px)' }}
               label={nodeCopy.bio}
               sec={`${activeConfig.labelPrefix}.01 // BIO`}
               control={CONTROL_POINTS.bio}
@@ -752,10 +753,11 @@ export default function App() {
               openLabel={copy.open}
               ariaLabel={copy.openNodeAria(nodeCopy.bio)}
               mobileOrder={1}
+              tooltipSide="right"
             />
 
-            <MapNode 
-              position={useGridLayout ? undefined : { top: '61%', left: '38%' }}
+            <MapNode
+              position={useGridLayout ? undefined : { top: '61%', left: '40%' }}
               label={nodeCopy.history}
               sec={`${activeConfig.labelPrefix}.02 // HIST`}
               control={CONTROL_POINTS.experience}
@@ -767,10 +769,11 @@ export default function App() {
               openLabel={copy.open}
               ariaLabel={copy.openNodeAria(nodeCopy.history)}
               mobileOrder={2}
+              tooltipSide="left"
             />
 
-            <MapNode 
-              position={useGridLayout ? undefined : { top: '34%', left: '57%' }}
+            <MapNode
+              position={useGridLayout ? undefined : { top: '36%', left: '64%' }}
               label={nodeCopy.data}
               sec={`${activeConfig.labelPrefix}.03 // DATA`}
               control={CONTROL_POINTS.projects}
@@ -782,10 +785,11 @@ export default function App() {
               openLabel={copy.open}
               ariaLabel={copy.openNodeAria(nodeCopy.data)}
               mobileOrder={3}
+              tooltipSide="left"
             />
 
-            <MapNode 
-              position={useGridLayout ? undefined : { top: '54%', left: 'clamp(70%, 74%, calc(100% - 180px))' }}
+            <MapNode
+              position={useGridLayout ? undefined : { top: '61%', left: 'clamp(65%, 71%, calc(100% - 275px))' }}
               label={nodeCopy.contact}
               sec={`${activeConfig.labelPrefix}.04 // COMM`}
               control={CONTROL_POINTS.contact}
@@ -797,6 +801,7 @@ export default function App() {
               openLabel={copy.open}
               ariaLabel={copy.openNodeAria(nodeCopy.contact)}
               mobileOrder={4}
+              tooltipSide="left"
             />
           </div>
         </div>
@@ -869,7 +874,7 @@ export default function App() {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed bottom-0 left-0 right-0 z-50 lg:hidden rounded-t-3xl bg-[#0a0b0c]/98 border-t-4 p-5 pb-8 backdrop-blur-3xl shadow-[0_-20px_50px_rgba(0,0,0,0.8)]"
+            className="fixed bottom-0 left-0 right-0 z-50 lg:hidden rounded-t-3xl bg-[#0a0b0c]/98 border-t-4 p-5 pb-[max(2rem,env(safe-area-inset-bottom))] backdrop-blur-3xl shadow-[0_-20px_50px_rgba(0,0,0,0.8)]"
             style={{ borderColor: activeColor }}
           >
             <div className="flex justify-center mb-5">
@@ -1003,7 +1008,7 @@ function MapFurniture({ themeColor, language }: { themeColor: string; language: 
 
   return (
     <div className="pointer-events-none fixed inset-0 z-30">
-      <div className="absolute left-10 top-[42%] hidden font-mono text-[8px] tracking-[0.26em] text-white/22 lg:block">
+      <div className="absolute left-10 top-[40%] hidden font-mono text-[8px] tracking-[0.26em] text-white/22 lg:block">
         <div className="mb-1">DATUM // WGS84</div>
         <div>PROJ // UTM 48S</div>
       </div>
@@ -1016,7 +1021,7 @@ function MapFurniture({ themeColor, language }: { themeColor: string; language: 
         <div className="font-mono text-[8px] font-bold tracking-[0.24em] text-white/28">TRUE NORTH</div>
       </div>
 
-      <div className="absolute bottom-12 left-1/2 hidden -translate-x-1/2 lg:block">
+      <div className="absolute bottom-16 left-1/2 hidden -translate-x-1/2 lg:block">
         <div className="flex items-end gap-1 font-mono text-[8px] text-white/30">
           <span>0</span>
           <div className="mb-1 flex h-2 w-40 border border-white/20">
@@ -1030,7 +1035,7 @@ function MapFurniture({ themeColor, language }: { themeColor: string; language: 
         <div className="mt-1 text-center font-mono text-[8px] tracking-[0.26em] text-white/20">SCALE 1:5000</div>
       </div>
 
-      <div className="absolute bottom-[6.5rem] right-4 flex w-36 flex-col gap-2 rounded-xl border border-white/10 bg-[#07090a]/82 p-3 font-mono shadow-[0_18px_40px_rgba(0,0,0,0.65)] backdrop-blur-2xl lg:hidden">
+      <div className="absolute bottom-[9rem] right-3 hidden w-28 flex-col gap-2 rounded-xl border border-white/10 bg-[#07090a]/82 p-3 font-mono shadow-[0_18px_40px_rgba(0,0,0,0.65)] backdrop-blur-2xl md:flex lg:hidden">
         <div className="flex items-center justify-between">
           <div className="text-[7px] font-bold uppercase tracking-[0.2em] text-white/28">{copy.mobileMapStatus}</div>
           <Compass size={15} style={{ color: themeColor }} />
@@ -1058,7 +1063,7 @@ function LayerLegend({ themeColor, language }: { themeColor: string; language: L
   const layers = MAP_LAYERS[language];
 
   return (
-    <div className="pointer-events-none fixed left-8 top-[11.5rem] z-30 hidden w-52 border border-white/10 bg-[#07090a]/72 p-3 font-mono shadow-[0_18px_46px_rgba(0,0,0,0.62)] backdrop-blur-2xl lg:block xl:top-[12rem]">
+    <div className="pointer-events-none fixed left-8 top-[8.5rem] z-30 hidden w-48 border border-white/10 bg-[#07090a]/72 p-3 font-mono shadow-[0_18px_46px_rgba(0,0,0,0.62)] backdrop-blur-2xl lg:block xl:top-[9rem]">
       <div className="mb-2.5 flex items-center justify-between border-b border-white/8 pb-2">
         <span className="text-[7px] font-black uppercase tracking-[0.24em] text-white/34">{copy.layerLegend}</span>
         <span className="text-[8px] font-bold" style={{ color: themeColor }}>L04</span>
@@ -1068,7 +1073,7 @@ function LayerLegend({ themeColor, language }: { themeColor: string; language: L
           <div key={layer.code} className="grid grid-cols-[1.4rem_auto_1fr] items-center gap-2 text-[7px] uppercase tracking-[0.14em] text-white/38">
             <LayerSymbol type={layer.symbol} color={themeColor} />
             <span className="font-bold" style={{ color: themeColor }}>{layer.code}</span>
-            <span className="truncate">{layer.label}</span>
+            <span className="truncate" title={layer.label}>{layer.label}</span>
           </div>
         ))}
       </div>
@@ -1104,7 +1109,7 @@ function LayerSymbol({ type, color }: { type: LayerRecord['symbol']; color: stri
   );
 }
 
-function MapNode({ position, label, sec, control, icon, themeColor, activeConfig, onClick, useGridLayout, openLabel, ariaLabel }: MapNodeProps) {
+function MapNode({ position, label, sec, control, icon, themeColor, activeConfig, onClick, useGridLayout, openLabel, ariaLabel, tooltipSide = 'below' }: MapNodeProps) {
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== 'Enter' && event.key !== ' ') return;
     event.preventDefault();
@@ -1114,10 +1119,13 @@ function MapNode({ position, label, sec, control, icon, themeColor, activeConfig
   return (
     <motion.div
       style={!useGridLayout ? { ...position } : {}}
-      className={`${useGridLayout ? 'relative col-span-1 w-full' : 'absolute -translate-x-1/2 -translate-y-1/2'} flex flex-col items-center group cursor-pointer z-20`}
+      className={`${useGridLayout ? 'relative col-span-1 w-full' : 'absolute -translate-x-1/2 -translate-y-1/2'} flex flex-col items-center group cursor-pointer z-20 focus-visible:outline-none`}
       role="button"
       tabIndex={0}
       aria-label={ariaLabel}
+      aria-haspopup="dialog"
+      onFocus={(e) => { (e.currentTarget as HTMLElement).style.setProperty('outline', `2px solid ${themeColor}`); (e.currentTarget as HTMLElement).style.setProperty('outline-offset', '4px'); }}
+      onBlur={(e) => { (e.currentTarget as HTMLElement).style.removeProperty('outline'); (e.currentTarget as HTMLElement).style.removeProperty('outline-offset'); }}
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       whileHover={{ scale: 1.04 }}
@@ -1125,13 +1133,14 @@ function MapNode({ position, label, sec, control, icon, themeColor, activeConfig
       onClick={onClick}
       onKeyDown={handleKeyDown}
     >
-      {/* Icon button */}
-      <div
-        className={`relative flex h-[3.75rem] w-[3.75rem] md:h-20 md:w-20 lg:h-[5.5rem] lg:w-[5.5rem] xl:h-24 xl:w-24 items-center justify-center border border-white/10 bg-[#080a0b]/80 backdrop-blur-md shadow-2xl transition-all duration-300 group-hover:border-white/30 ${activeConfig.shape}`}
-      >
-        <div className="absolute -top-2 left-1/2 z-20 -translate-x-1/2 rounded border border-white/10 bg-[#080a0b]/90 px-1.5 py-0.5 font-mono text-[7px] font-bold tracking-[0.18em] text-white/36">
+      {/* Icon button — wrapper keeps badge outside clip-path */}
+      <div className="relative">
+        <div className="absolute -top-2 left-1/2 z-20 -translate-x-1/2 rounded border border-white/10 bg-[#080a0b]/90 px-1.5 py-0.5 font-mono text-[7px] font-bold tracking-[0.18em] text-white/60 whitespace-nowrap">
           {control.code}
         </div>
+      <div
+        className={`relative flex h-[3.75rem] w-[3.75rem] md:h-20 md:w-20 lg:h-[4.5rem] lg:w-[4.5rem] xl:h-20 xl:w-20 items-center justify-center border border-white/10 bg-[#080a0b]/80 backdrop-blur-md shadow-2xl transition-all duration-300 group-hover:border-white/30 ${activeConfig.shape}`}
+      >
 
         {/* BG tint fill */}
         <div
@@ -1141,7 +1150,7 @@ function MapNode({ position, label, sec, control, icon, themeColor, activeConfig
 
         {/* Icon */}
         <div className="z-10 transition-transform duration-300 group-hover:scale-110" style={{ color: themeColor }}>
-          {React.cloneElement(icon, { size: 28, className: "md:w-7 md:h-7 lg:w-8 lg:h-8 xl:w-9 xl:h-9" })}
+          {React.cloneElement(icon, { size: 28, className: "md:w-7 md:h-7 lg:w-6 lg:h-6 xl:w-7 xl:h-7" })}
         </div>
 
         {/* Outer dashed orbit ring */}
@@ -1199,16 +1208,17 @@ function MapNode({ position, label, sec, control, icon, themeColor, activeConfig
           style={{ boxShadow: `0 0 18px ${themeColor}44, 0 0 40px ${themeColor}11`, borderRadius: 'inherit' }}
         />
       </div>
+      </div>
 
       {/* Label card */}
-      <div className={`mt-3 md:mt-4 relative flex min-h-[52px] md:min-h-[64px] lg:min-h-[58px] xl:min-h-[64px] flex-col items-center justify-center overflow-hidden border border-white/5 group-hover:border-white/20 bg-white/[0.03] group-hover:bg-white/[0.07] px-3 md:px-6 lg:px-6 xl:px-8 py-2 md:py-3 lg:py-3 xl:py-3.5 backdrop-blur-xl transition-all duration-300 ${useGridLayout ? 'w-full' : 'min-w-[120px] md:min-w-[165px] lg:min-w-[175px] xl:min-w-[195px]'} ${activeConfig.shape}`}>
+      <div className={`mt-2 md:mt-4 lg:mt-2 relative flex min-h-[52px] md:min-h-[64px] lg:min-h-[44px] xl:min-h-[48px] flex-col items-center justify-center overflow-hidden border border-white/5 group-hover:border-white/20 bg-white/[0.03] group-hover:bg-white/[0.07] px-3 md:px-6 lg:px-4 xl:px-5 py-2 md:py-3 lg:py-2 xl:py-2.5 backdrop-blur-xl transition-all duration-300 ${useGridLayout ? 'w-full' : 'min-w-[120px] md:min-w-[165px] lg:min-w-[145px] xl:min-w-[160px]'} ${activeConfig.shape}`}>
         {/* Theme-colored top accent line */}
         <div
           className="absolute top-0 left-0 right-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           style={{ backgroundColor: themeColor }}
         />
 
-        <span className="text-[10px] md:text-[13px] lg:text-[13px] xl:text-[14px] font-bold tracking-[0.08em] text-white/75 group-hover:text-white uppercase text-center block w-full leading-tight transition-colors duration-200">
+        <span className="text-[10px] md:text-[13px] lg:text-[11px] xl:text-[12px] font-bold tracking-[0.08em] text-white/75 group-hover:text-white uppercase text-center block w-full leading-tight transition-colors duration-200">
           {label}
         </span>
         <span className="mt-1 font-mono text-[7px] md:text-[9px] font-normal text-white/25 group-hover:text-white/45 tracking-tight transition-colors duration-200">
@@ -1227,7 +1237,11 @@ function MapNode({ position, label, sec, control, icon, themeColor, activeConfig
         </div>
       </div>
 
-      <div className={`pointer-events-none absolute ${useGridLayout ? 'hidden' : 'block'} left-1/2 top-full mt-3 w-52 -translate-x-1/2 border border-white/8 bg-[#07090a]/88 p-3 font-mono text-[8px] tracking-[0.14em] text-white/35 opacity-0 shadow-2xl backdrop-blur-xl transition-all duration-300 group-hover:translate-y-1 group-hover:opacity-100 ${activeConfig.shape}`}>
+      <div className={`pointer-events-none absolute ${useGridLayout ? 'hidden' : 'block'} w-52 border border-white/8 bg-[#07090a]/88 p-3 font-mono text-[8px] tracking-[0.14em] text-white/35 opacity-0 shadow-2xl backdrop-blur-xl transition-all duration-300 group-hover:opacity-100 ${activeConfig.shape}
+        ${tooltipSide === 'below' ? 'left-1/2 top-full mt-3 -translate-x-1/2 group-hover:translate-y-1' : ''}
+        ${tooltipSide === 'left' ? 'right-full mr-3 top-1/2 -translate-y-1/2 group-hover:-translate-x-1' : ''}
+        ${tooltipSide === 'right' ? 'left-full ml-3 top-1/2 -translate-y-1/2 group-hover:translate-x-1' : ''}
+      `}>
         <div className="mb-2 flex items-center justify-between">
           <span style={{ color: themeColor }}>{control.projection}</span>
           <span>{control.datum}</span>
@@ -1265,6 +1279,19 @@ function ContentModal({ id, language, themeColor, activeConfig, onClose }: Conte
     const handleKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key === 'Escape') {
         handleClose();
+        return;
+      }
+      if (event.key === 'Tab' && dialogRef.current) {
+        const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input, textarea, select, [tabindex]:not([tabindex="-1"])'
+        );
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey) {
+          if (document.activeElement === first) { event.preventDefault(); last?.focus(); }
+        } else {
+          if (document.activeElement === last) { event.preventDefault(); first?.focus(); }
+        }
       }
     };
 
@@ -1360,7 +1387,7 @@ function ContentModal({ id, language, themeColor, activeConfig, onClose }: Conte
                 <div className="mb-2 font-mono text-[8px] md:text-[10px] font-bold tracking-[0.4em] text-white/30 uppercase">{copy.subjectIdentifier}</div>
                 <h2
                   id="content-modal-title"
-                  className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight uppercase leading-none"
+                  className="text-2xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight uppercase leading-none"
                   style={{ color: themeColor }}
                 >
                   {CV_DATA.profile.name}
@@ -1661,6 +1688,7 @@ function ContentModal({ id, language, themeColor, activeConfig, onClose }: Conte
                     <span>{copy.openSystem}</span>
                     <ExternalLink
                       size={13}
+                      aria-hidden="true"
                       className="transition-transform duration-300 group-hover/thesis:translate-x-0.5 group-hover/thesis:-translate-y-0.5"
                       style={{ color: themeColor }}
                     />
@@ -1680,7 +1708,7 @@ function ContentModal({ id, language, themeColor, activeConfig, onClose }: Conte
 
             <div className="flex flex-col items-center gap-6 md:gap-8">
               {/* Animated orbit icon */}
-              <div className="relative flex items-center justify-center h-32 w-32 md:h-40 md:w-40">
+              <div className="relative flex items-center justify-center h-24 w-24 md:h-32 md:w-32" aria-hidden="true">
                 <div
                   className="absolute inset-0 rounded-full border-2 border-dashed animate-spin-slow"
                   style={{ borderColor: `${themeColor}33`, animationDuration: '12s' }}
@@ -1690,7 +1718,7 @@ function ContentModal({ id, language, themeColor, activeConfig, onClose }: Conte
                   style={{ borderColor: `${themeColor}18`, animationDuration: '20s', animationDirection: 'reverse' }}
                 />
                 <div
-                  className="h-[5.5rem] w-[5.5rem] md:h-28 md:w-28 rounded-full flex items-center justify-center"
+                  className="h-16 w-16 md:h-20 md:w-20 rounded-full flex items-center justify-center"
                   style={{ background: `radial-gradient(circle, ${themeColor}12 0%, transparent 70%)` }}
                 >
                   <motion.div
@@ -1745,7 +1773,7 @@ function ContentModal({ id, language, themeColor, activeConfig, onClose }: Conte
 
               {/* Status indicator */}
               <div className="flex items-center gap-2.5 px-6 py-2.5 rounded-full border border-white/8 bg-white/[0.02]">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse flex-shrink-0" style={{ backgroundColor: themeColor }} />
                 <p className="text-white/35 font-mono text-[8px] md:text-[9px] tracking-[0.2em] uppercase">
                   {copy.transmission}
                 </p>

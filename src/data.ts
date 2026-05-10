@@ -86,7 +86,7 @@ export const CV_DATA = {
       "GNSS RTK Operations",
       "UAV Mapping",
       "Google Earth Engine",
-      "Batimetry Data Processing"
+      "Bathymetry Data Processing"
     ],
     tools: [
       "TBC", "Emlid Studio", "Agisoft Metashape", "ArcMap/ArcGIS", "QGIS", "PostgresSQL", "PostGIS", "Microsoft Access"
