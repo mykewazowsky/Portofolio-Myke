@@ -18,7 +18,8 @@ import {
   VolumeX,
   Activity,
   Monitor,
-  Info
+  Info,
+  ExternalLink
 } from 'lucide-react';
 
 function LinkedInIcon({ size = 24, className = '', style = {} }: { size?: number; className?: string; style?: React.CSSProperties }) {
@@ -1225,6 +1226,26 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: any) {
                 <p className="text-xs md:text-sm text-white/45 leading-relaxed italic max-w-xl">
                   {CV_DATA.education[0].thesis}
                 </p>
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-2 font-mono text-[8px] md:text-[9px] uppercase tracking-[0.28em] text-white/25">
+                    <span className="h-px w-8" style={{ backgroundColor: `${themeColor}44` }} />
+                    PADIS_WEBGIS
+                  </div>
+                  <a
+                    href={CV_DATA.education[0].thesisUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group/thesis inline-flex w-fit items-center gap-2 rounded-lg border border-white/10 bg-black/30 px-3.5 py-2 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/55 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.06] hover:text-white"
+                    style={{ boxShadow: `0 0 24px ${themeColor}10` }}
+                  >
+                    <span>Open System</span>
+                    <ExternalLink
+                      size={13}
+                      className="transition-transform duration-300 group-hover/thesis:translate-x-0.5 group-hover/thesis:-translate-y-0.5"
+                      style={{ color: themeColor }}
+                    />
+                  </a>
+                </div>
               </div>
             </div>
           </div>

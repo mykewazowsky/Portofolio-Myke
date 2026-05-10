@@ -17,6 +17,7 @@ export const CV_DATA = {
       period: "2022 - 2026 (Expected)",
       gpa: "3.29/4.00",
       thesis: "Developing a web-based geospatial information system to estimate state financial losses from crop productivity reduction due to floods and droughts.",
+      thesisUrl: "https://padis-beryl.vercel.app/",
       specialization: "Hydrography (Offshore Positioning, Nautical Sciences, Met-Ocean Analysis)"
     }
   ],

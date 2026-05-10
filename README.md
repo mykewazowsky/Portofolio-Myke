@@ -1,31 +1,25 @@
 # Portofolio-nya Andhika
 
-Website portofolio pribadi yang menampilkan daftar proyek dan karya. Dibangun menggunakan Vite dan di-deploy melalui Vercel.
+Website portofolio pribadi Andhika Prasetya Adi Nugroho, Hydrographic & Geomatic Engineer. Situs ini menampilkan profil, pengalaman, kemampuan geospasial, dan thesis research dalam pengalaman web interaktif berbasis tema.
 
 Live demo: [portofolio-nya-andhika.vercel.app](https://portofolio-nya-andhika.vercel.app)
 
----
-
-## Daftar Isi
-
-- [Tentang Proyek](#tentang-proyek)
-- [Teknologi yang Digunakan](#teknologi-yang-digunakan)
-- [Struktur Proyek](#struktur-proyek)
-- [Cara Menjalankan Secara Lokal](#cara-menjalankan-secara-lokal)
-- [Deployment](#deployment)
-- [Lisensi](#lisensi)
+Research thesis system: [PADIS WebGIS](https://padis-beryl.vercel.app/)
 
 ---
 
 ## Tentang Proyek
 
-Website ini merupakan portofolio pribadi yang dirancang untuk memperkenalkan diri dan menampilkan daftar proyek yang pernah dikerjakan. Tujuan utama pembuatan portofolio ini adalah sebagai media presentasi karya kepada rekruter, klien, maupun komunitas pengembang.
+Portofolio ini dirancang sebagai media presentasi profesional untuk memperkenalkan latar belakang akademik, pengalaman lapangan, kepemimpinan organisasi, dan kapabilitas teknis di bidang geodesi, geomatika, hidrografi, serta sistem informasi geospasial.
 
 Fitur utama:
 
-- Daftar proyek beserta deskripsi singkat
-- Tampilan responsif untuk berbagai ukuran layar
-- Performa loading yang cepat berkat Vite sebagai build tool
+- Mode visual interaktif untuk Hydro, GIS, Survey, dan Geo Precision
+- Profil personal dengan nuansa geospatial command interface
+- Riwayat pengalaman kerja, organisasi, dan technical stack
+- Section Research Thesis dengan akses langsung ke PADIS WebGIS
+- Tampilan responsif untuk desktop dan mobile
+- Animasi dan micro-interaction menggunakan Motion
 
 ---
 
@@ -33,47 +27,46 @@ Fitur utama:
 
 | Teknologi | Keterangan |
 |-----------|------------|
-| [Vite](https://vitejs.dev/) | Build tool dan development server |
-| HTML5 | Struktur halaman |
-| CSS3 | Styling dan layout |
-| JavaScript (ES6+) | Logika interaktivitas |
-| [Vercel](https://vercel.com/) | Platform hosting dan deployment |
+| [React](https://react.dev/) | Library UI utama |
+| [TypeScript](https://www.typescriptlang.org/) | Type safety untuk kode frontend |
+| [Vite](https://vite.dev/) | Build tool dan development server |
+| [Tailwind CSS](https://tailwindcss.com/) | Utility-first styling |
+| [Motion](https://motion.dev/) | Animasi komponen React |
+| [Lucide React](https://lucide.dev/) | Ikon UI |
+| [Vercel](https://vercel.com/) | Hosting dan deployment |
 
 ---
 
 ## Struktur Proyek
 
+```text
+Portofolio-Web/
+|-- public/
+|   `-- profile-picture.jpg
+|-- src/
+|   |-- App.tsx
+|   |-- data.ts
+|   |-- index.css
+|   `-- main.tsx
+|-- index.html
+|-- package.json
+|-- tsconfig.json
+|-- vite.config.ts
+`-- README.md
 ```
-portofolio-nya-andhika/
-├── public/
-│   └── favicon.ico
-├── src/
-│   ├── assets/
-│   ├── components/
-│   ├── styles/
-│   └── main.js
-├── index.html
-├── vite.config.js
-├── package.json
-└── README.md
-```
-
-> Sesuaikan struktur di atas dengan struktur folder aktual di repository.
 
 ---
 
 ## Cara Menjalankan Secara Lokal
 
-Pastikan [Node.js](https://nodejs.org/) versi 16 ke atas sudah terinstal di komputer Anda.
+Pastikan Node.js sudah terinstal di komputer Anda.
 
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/username/portofolio-nya-andhika.git
-cd portofolio-nya-andhika
+git clone https://github.com/mykewazowsky/Portofolio-Myke.git
+cd Portofolio-Myke
 ```
-
-> Ganti `username` dengan username GitHub Anda.
 
 ### 2. Install Dependensi
 
@@ -87,9 +80,15 @@ npm install
 npm run dev
 ```
 
-Buka browser dan akses `http://localhost:5173` untuk melihat hasilnya.
+Secara default, project berjalan di `http://localhost:3000/`. Jika port tersebut sedang dipakai, Vite akan memakai port berikutnya yang tersedia.
 
-### 4. Build untuk Produksi
+### 4. Cek TypeScript
+
+```bash
+npm run lint
+```
+
+### 5. Build untuk Produksi
 
 ```bash
 npm run build
@@ -97,7 +96,7 @@ npm run build
 
 Hasil build akan tersimpan di folder `dist/`.
 
-### 5. Preview Hasil Build
+### 6. Preview Hasil Build
 
 ```bash
 npm run preview
@@ -107,31 +106,12 @@ npm run preview
 
 ## Deployment
 
-Website ini di-deploy secara otomatis melalui [Vercel](https://vercel.com/) setiap kali ada perubahan yang di-push ke branch `main`.
-
-Langkah deploy manual (jika diperlukan):
-
-1. Install Vercel CLI:
-   ```bash
-   npm install -g vercel
-   ```
-
-2. Login ke akun Vercel:
-   ```bash
-   vercel login
-   ```
-
-3. Deploy:
-   ```bash
-   vercel --prod
-   ```
+Website ini di-deploy melalui Vercel. Push ke branch utama akan memicu proses deployment sesuai konfigurasi project di Vercel.
 
 ---
 
-## Lisensi
+## Kontak
 
-Proyek ini bersifat open source dan tersedia di bawah lisensi [MIT](LICENSE).
+Dibuat oleh Andhika Prasetya Adi Nugroho.
 
----
-
-Dibuat oleh Andhika Prasetya Adi Nugroho
+Email: [andhikaprasetya68@gmail.com](mailto:andhikaprasetya68@gmail.com)
