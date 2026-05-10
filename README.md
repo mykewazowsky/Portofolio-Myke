@@ -17,6 +17,8 @@ Fitur utama:
 - Mode visual interaktif untuk Hydro, GIS, Survey, dan Geo Precision
 - Profil personal dengan nuansa geospatial command interface
 - Riwayat pengalaman kerja, organisasi, dan technical stack
+- Logo personal yang mengikuti warna tema aktif
+- Card Core Advantage yang menampilkan kekuatan utama tiap mode
 - Section Research Thesis dengan akses langsung ke PADIS WebGIS
 - Tombol Download CV Andhika dari file PDF portfolio
 - Metadata SEO, Open Graph, dan aksesibilitas dasar untuk navigasi interaktif
@@ -45,6 +47,7 @@ Fitur utama:
 Portofolio-Web/
 |-- public/
 |   |-- Andhika_Nugroho_CV_Resume.pdf
+|   |-- logo.svg
 |   `-- profile-picture.jpg
 |-- src/
 |   |-- App.tsx

@@ -6,6 +6,11 @@ interface LinkedInIconProps {
   style?: CSSProperties;
 }
 
+interface BrandLogoProps {
+  className?: string;
+  style?: CSSProperties;
+}
+
 export function LinkedInIcon({ size = 24, className = '', style = {} }: LinkedInIconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
@@ -13,5 +18,19 @@ export function LinkedInIcon({ size = 24, className = '', style = {} }: LinkedIn
       <rect width="4" height="12" x="2" y="9" />
       <circle cx="4" cy="4" r="2" />
     </svg>
+  );
+}
+
+export function BrandLogo({ className = '', style = {} }: BrandLogoProps) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`inline-block bg-current ${className}`}
+      style={{
+        WebkitMask: 'url(/logo.svg) center / contain no-repeat',
+        mask: 'url(/logo.svg) center / contain no-repeat',
+        ...style,
+      }}
+    />
   );
 }

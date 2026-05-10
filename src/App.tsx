@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { CV_DATA } from './data';
 import { useWindowSize } from './hooks';
-import { LinkedInIcon } from './icons';
+import { BrandLogo, LinkedInIcon } from './icons';
 import { THEMES, type Theme, type ThemeConfig } from './themes';
 
 type ModalId = 'bio' | 'experience' | 'projects' | 'contact';
@@ -266,19 +266,19 @@ export default function App() {
           animate={{ x: 0, opacity: 1 }}
           className="flex flex-col items-start pointer-events-auto"
         >
-          <div className="flex items-center gap-3 md:gap-4 flex-row justify-start">
+          <div className="flex items-center gap-3 md:gap-4 lg:gap-5 flex-row justify-start">
             <motion.div
               key={theme}
               initial={{ scale: 0, rotate: -45 }}
               animate={{ scale: 1, rotate: 0 }}
-              className="p-2 md:p-3 lg:p-4 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl relative overflow-hidden group"
+              className="p-2 md:p-3 lg:p-3.5 xl:p-4 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl relative overflow-hidden group"
               style={{ color: activeColor }}
             >
-              <activeConfig.icon size={24} strokeWidth={2.5} className="md:w-8 md:h-8 lg:w-10 lg:h-10 relative z-10" />
+              <BrandLogo className="relative z-10 h-8 w-8 md:h-11 md:w-11 lg:h-14 lg:w-14 xl:h-16 xl:w-16" />
               <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             </motion.div>
             <h1
-              className="text-2xl font-bold tracking-[-0.03em] md:text-5xl lg:text-7xl xl:text-8xl uppercase"
+              className="text-3xl font-bold tracking-tight md:text-5xl lg:text-7xl xl:text-8xl uppercase"
               style={{ color: activeColor, textShadow: `0 0 35px ${activeColor}33`, fontWeight: 700 }}
             >
               Hello!
@@ -365,7 +365,9 @@ export default function App() {
             className="flex items-center gap-3 px-4 py-1.5 bg-white/5 backdrop-blur-md rounded-full border border-white/10 pointer-events-auto"
           >
             <div className="h-6 w-6 rounded-full border border-white/20 overflow-hidden">
-               <img src={CV_DATA.profile.profileImage} alt="Andhika profile" className="h-full w-full object-cover grayscale" decoding="async" />
+              <div className="flex h-full w-full items-center justify-center bg-[#080a0b]/80" style={{ color: activeColor }}>
+                <BrandLogo className="h-4 w-4" />
+              </div>
             </div>
             <span className="text-[8px] font-bold tracking-widest text-white/60">ANDHIKA</span>
             <div className="h-3 w-[1px] bg-white/10" />
@@ -385,8 +387,8 @@ export default function App() {
             </div>
             <div className={`relative h-14 w-14 border border-white/20 bg-white/5 overflow-hidden transition-all duration-500 group-hover:border-white/40 group-hover:scale-105 shadow-2xl ${activeConfig.shape}`}
                  style={{ boxShadow: `0 0 25px ${activeColor}22` }}>
-              <img 
-                src={CV_DATA.profile.profileImage} 
+              <img
+                src={CV_DATA.profile.profileImage}
                 alt="Andhika profile"
                 className="h-full w-full object-cover grayscale brightness-110 contrast-125 transition-all duration-700 group-hover:grayscale-0 group-hover:contrast-100"
                 decoding="async"
@@ -429,7 +431,7 @@ export default function App() {
             
             {/* Updated Route Line for optimized non-colliding topology */}
             <motion.path
-              d="M 22 38 L 36 62 L 55 30 L 70 55"
+              d="M 24 42 L 38 61 L 57 34 L 74 54"
               fill="none"
               stroke={activeColor}
               strokeWidth="0.15"
@@ -442,7 +444,7 @@ export default function App() {
 
             {/* Secondary Glow Path */}
             <path
-              d="M 22 38 L 36 62 L 55 30 L 70 55"
+              d="M 24 42 L 38 61 L 57 34 L 74 54"
               fill="none"
               stroke={activeColor}
               strokeWidth="0.05"
@@ -454,7 +456,7 @@ export default function App() {
               <animateMotion 
                 dur="6s" 
                 repeatCount="indefinite" 
-                path="M 22 38 L 36 62 L 55 30 L 70 55" 
+                path="M 24 42 L 38 61 L 57 34 L 74 54"
               />
             </motion.circle>
             <motion.circle r="0.3" fill={activeColor}>
@@ -462,16 +464,16 @@ export default function App() {
                 dur="6s" 
                 begin="3s"
                 repeatCount="indefinite" 
-                path="M 22 38 L 36 62 L 55 30 L 70 55" 
+                path="M 24 42 L 38 61 L 57 34 L 74 54"
               />
             </motion.circle>
           </svg>
         )}
 
         <div className={`relative h-full w-full max-w-[1400px] mx-auto ${useGridLayout ? 'flex items-start justify-center overflow-y-auto overflow-x-hidden' : ''}`}>
-          <div className={useGridLayout ? `grid grid-cols-2 gap-5 md:gap-8 w-full px-4 md:max-w-lg mx-auto pb-28 ${isTablet && !isMobile ? 'pt-8' : ''}` : "relative h-full w-full"}>
+          <div className={useGridLayout ? `grid grid-cols-2 gap-x-4 gap-y-6 md:gap-8 w-full px-4 md:max-w-lg mx-auto pb-28 ${isTablet && !isMobile ? 'pt-8' : ''}` : "relative h-full w-full"}>
             <MapNode 
-              position={useGridLayout ? undefined : { top: '38%', left: '22%' }}
+              position={useGridLayout ? undefined : { top: '42%', left: 'clamp(190px, 24%, 310px)' }}
               label={theme === 'hydro' ? "Sonar Origin" : theme === 'gis' ? "Root Node" : theme === 'land' ? "Station 001" : "Base Geoid"}
               sec={`${activeConfig.labelPrefix}.01 // BIO`}
               icon={<MapPin size={28} />}
@@ -483,7 +485,7 @@ export default function App() {
             />
 
             <MapNode 
-              position={useGridLayout ? undefined : { top: '62%', left: '36%' }}
+              position={useGridLayout ? undefined : { top: '61%', left: '38%' }}
               label={theme === 'hydro' ? "Sounding Dept" : theme === 'gis' ? "Logic Layer" : theme === 'land' ? "Field Grid" : "Prec Bench"}
               sec={`${activeConfig.labelPrefix}.02 // HIST`}
               icon={<History size={28} />}
@@ -495,7 +497,7 @@ export default function App() {
             />
 
             <MapNode 
-              position={useGridLayout ? undefined : { top: '30%', left: '55%' }}
+              position={useGridLayout ? undefined : { top: '34%', left: '57%' }}
               label={theme === 'hydro' ? "Wreck Data" : theme === 'gis' ? "Geo Registry" : theme === 'land' ? "Site Plan" : "Sat Link"}
               sec={`${activeConfig.labelPrefix}.03 // DATA`}
               icon={<LayoutDashboard size={28} />}
@@ -507,7 +509,7 @@ export default function App() {
             />
 
             <MapNode 
-              position={useGridLayout ? undefined : { top: '55%', left: '70%' }}
+              position={useGridLayout ? undefined : { top: '54%', left: 'clamp(70%, 74%, calc(100% - 180px))' }}
               label={theme === 'hydro' ? "Comms Buoy" : theme === 'gis' ? "API Portal" : theme === 'land' ? "Heliport" : "Ref Center"}
               sec={`${activeConfig.labelPrefix}.04 // COMM`}
               icon={<Satellite size={28} />}
@@ -522,7 +524,7 @@ export default function App() {
       </main>
 
       {/* Dynamic Strength Indicator - Fixed on desktop (lg+), Bottom sheet on (<lg) */}
-      <div className="fixed bottom-12 right-12 z-40 hidden lg:block">
+      <div className="fixed bottom-8 right-8 xl:bottom-10 xl:right-10 z-40 hidden lg:block">
         <AnimatePresence mode="wait">
           <motion.div
             key={theme + '-strength-desktop'}
@@ -530,28 +532,48 @@ export default function App() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}
             transition={{ duration: 0.35, ease: 'easeOut' }}
-            className={`p-6 bg-[#0a0b0c]/95 backdrop-blur-3xl border border-white/10 w-72 shadow-[0_20px_50px_rgba(0,0,0,0.8)] ${activeConfig.shape}`}
-            style={{ borderRight: `4px solid ${activeColor}` }}
+            className={`relative w-64 xl:w-72 overflow-hidden border border-white/10 bg-[#0a0b0c]/92 p-4 xl:p-5 shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-3xl ${activeConfig.shape}`}
+            style={{
+              borderRight: `3px solid ${activeColor}`,
+              boxShadow: `0 20px 50px rgba(0,0,0,0.72), 0 0 32px ${activeColor}12`,
+            }}
           >
-            <div className="mb-2 font-mono text-[10px] font-bold tracking-[0.3em] text-white/40 uppercase">CORE_ADVANTAGE</div>
-            <h3 className="text-xl font-black mb-2 tracking-tight uppercase" style={{ color: activeColor }}>{activeConfig.strengths.title}</h3>
-            <p className="text-[11px] text-white/50 mb-4 leading-relaxed font-medium">{activeConfig.strengths.description}</p>
+            <div
+              className="absolute inset-x-0 top-0 h-px opacity-70"
+              style={{ background: `linear-gradient(90deg, transparent, ${activeColor}99, transparent)` }}
+            />
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <div className="font-mono text-[8px] font-bold tracking-[0.28em] text-white/35 uppercase">CORE_ADVANTAGE</div>
+                <h3 className="mt-1 text-base xl:text-lg font-black tracking-tight uppercase leading-tight" style={{ color: activeColor }}>
+                  {activeConfig.strengths.title}
+                </h3>
+              </div>
+              <div
+                className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.035]"
+                style={{ color: activeColor, boxShadow: `inset 0 0 18px ${activeColor}0f` }}
+              >
+                <BrandLogo className="h-5 w-5" />
+              </div>
+            </div>
 
-            <div className="space-y-2">
+            <p className="text-[10px] xl:text-[11px] text-white/50 mb-3.5 leading-relaxed font-medium">{activeConfig.strengths.description}</p>
+
+            <div className="grid gap-1.5">
               {activeConfig.strengths.points.map((pt, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <div className="w-1.5 h-[1px] bg-current" style={{ color: activeColor }} />
-                  <span className="text-[9px] font-mono font-bold text-white/70 tracking-widest uppercase">{pt}</span>
+                <div key={i} className="flex items-center gap-2 rounded-md border border-white/[0.04] bg-white/[0.025] px-2.5 py-1.5">
+                  <div className="h-1 w-1 rounded-full flex-shrink-0" style={{ backgroundColor: activeColor }} />
+                  <span className="text-[8px] xl:text-[9px] font-mono font-bold text-white/65 tracking-[0.14em] uppercase leading-tight">{pt}</span>
                 </div>
               ))}
             </div>
 
-            <div className="mt-6 pt-4 border-t border-white/10">
-              <div className="text-[8px] font-mono text-white/30 tracking-[0.2em] mb-1">EQUIPMENT_STACK</div>
-              <div className="text-[10px] font-bold text-white/60 tracking-tight">{activeConfig.strengths.equipment}</div>
+            <div className="mt-4 pt-3 border-t border-white/10">
+              <div className="text-[7px] xl:text-[8px] font-mono text-white/30 tracking-[0.2em] mb-1">EQUIPMENT_STACK</div>
+              <div className="text-[9px] xl:text-[10px] font-bold text-white/60 tracking-tight leading-snug">{activeConfig.strengths.equipment}</div>
             </div>
             
-            <div className="mt-6 flex justify-between items-center opacity-20">
+            <div className="mt-4 flex justify-between items-center opacity-20">
               <div className="h-[1px] flex-1 bg-white" />
               <span className="mx-2 font-mono text-[8px]">V.04_SEC_AUTO</span>
               <div className="h-[1px] w-4 bg-white" />
@@ -607,13 +629,13 @@ export default function App() {
       {/* Telemetry Fixed Panel - Responsive width and padding */}
       <div className="fixed bottom-6 md:bottom-12 left-6 md:left-12 lg:left-12 lg:bottom-12 max-w-[calc(100%-3rem)] md:w-64 lg:w-64 z-40">
         <div 
-          className={`glass-panel p-3 md:p-6 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] transition-all duration-500 max-w-[180px] md:max-w-none lg:w-64 lg:max-w-none ${activeConfig.shape} ${theme === 'gis' ? 'bg-white/5' : 'bg-[#0a0b0c]/80'}`}
+          className={`glass-panel p-3 md:p-5 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] transition-all duration-500 max-w-[180px] md:max-w-none lg:w-60 lg:max-w-none ${activeConfig.shape} ${theme === 'gis' ? 'bg-white/5' : 'bg-[#0a0b0c]/80'}`}
           style={{ 
             borderLeft: `4px solid ${activeColor}`,
             boxShadow: `0 0 40px ${activeColor}11`
           }}
         >
-          <div className="mb-2 md:mb-4 flex items-center justify-between border-b border-white/5 pb-2">
+          <div className="mb-2 md:mb-3.5 flex items-center justify-between border-b border-white/5 pb-2">
             <span className="font-mono text-[8px] md:text-[10px] tracking-[0.2em] md:tracking-[0.3em] font-bold text-white/40 uppercase truncate mr-2">SYS_LINK // ACTIVE</span>
             <div className="flex gap-0.5 md:gap-1 items-end h-2 md:h-3 flex-shrink-0">
               {[0.4, 0.7, 1, 0.6, 0.8].map((h, i) => (
@@ -627,7 +649,7 @@ export default function App() {
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-1 gap-1.5 md:gap-4 font-mono text-[9px] md:text-[11px] tracking-tighter">
+          <div className="grid grid-cols-1 gap-1.5 md:gap-3.5 font-mono text-[9px] md:text-[11px] tracking-tighter">
             {activeConfig.telemetry.slice(0, isMobile ? 2 : 3).map((item, i) => {
               const Icon = item.icon;
               return (
@@ -688,7 +710,7 @@ function MapNode({ position, label, sec, icon, themeColor, activeConfig, onClick
     >
       {/* Icon button */}
       <div
-        className={`relative flex h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 items-center justify-center border border-white/10 bg-[#080a0b]/80 backdrop-blur-md shadow-2xl transition-all duration-300 group-hover:border-white/30 ${activeConfig.shape}`}
+        className={`relative flex h-[3.75rem] w-[3.75rem] md:h-20 md:w-20 lg:h-[5.5rem] lg:w-[5.5rem] xl:h-24 xl:w-24 items-center justify-center border border-white/10 bg-[#080a0b]/80 backdrop-blur-md shadow-2xl transition-all duration-300 group-hover:border-white/30 ${activeConfig.shape}`}
       >
         {/* BG tint fill */}
         <div
@@ -698,7 +720,7 @@ function MapNode({ position, label, sec, icon, themeColor, activeConfig, onClick
 
         {/* Icon */}
         <div className="z-10 transition-transform duration-300 group-hover:scale-110" style={{ color: themeColor }}>
-          {React.cloneElement(icon, { size: 28, className: "md:w-7 md:h-7 lg:w-9 lg:h-9" })}
+          {React.cloneElement(icon, { size: 28, className: "md:w-7 md:h-7 lg:w-8 lg:h-8 xl:w-9 xl:h-9" })}
         </div>
 
         {/* Outer dashed orbit ring */}
@@ -758,17 +780,17 @@ function MapNode({ position, label, sec, icon, themeColor, activeConfig, onClick
       </div>
 
       {/* Label card */}
-      <div className={`mt-3 md:mt-4 relative flex flex-col items-center overflow-hidden border border-white/5 group-hover:border-white/20 bg-white/[0.03] group-hover:bg-white/[0.07] px-3 md:px-6 lg:px-8 py-2 md:py-3 lg:py-3.5 backdrop-blur-xl transition-all duration-300 ${useGridLayout ? 'w-full' : 'min-w-[120px] md:min-w-[165px] lg:min-w-[195px]'} ${activeConfig.shape}`}>
+      <div className={`mt-3 md:mt-4 relative flex min-h-[52px] md:min-h-[64px] lg:min-h-[58px] xl:min-h-[64px] flex-col items-center justify-center overflow-hidden border border-white/5 group-hover:border-white/20 bg-white/[0.03] group-hover:bg-white/[0.07] px-3 md:px-6 lg:px-6 xl:px-8 py-2 md:py-3 lg:py-3 xl:py-3.5 backdrop-blur-xl transition-all duration-300 ${useGridLayout ? 'w-full' : 'min-w-[120px] md:min-w-[165px] lg:min-w-[175px] xl:min-w-[195px]'} ${activeConfig.shape}`}>
         {/* Theme-colored top accent line */}
         <div
           className="absolute top-0 left-0 right-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           style={{ backgroundColor: themeColor }}
         />
 
-        <span className="text-[10px] md:text-[13px] lg:text-[14px] font-bold tracking-[0.08em] text-white/75 group-hover:text-white uppercase text-center block w-full transition-colors duration-200">
+        <span className="text-[10px] md:text-[13px] lg:text-[13px] xl:text-[14px] font-bold tracking-[0.08em] text-white/75 group-hover:text-white uppercase text-center block w-full leading-tight transition-colors duration-200">
           {label}
         </span>
-        <span className="mt-0.5 font-mono text-[7px] md:text-[9px] font-normal text-white/25 group-hover:text-white/45 tracking-tight transition-colors duration-200">
+        <span className="mt-1 font-mono text-[7px] md:text-[9px] font-normal text-white/25 group-hover:text-white/45 tracking-tight transition-colors duration-200">
           {sec}
         </span>
 
@@ -1164,15 +1186,15 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalPro
         )}
 
         {id === 'contact' && (
-          <div className="space-y-8 md:space-y-10 py-2 md:py-4 text-center">
+          <div className="space-y-6 md:space-y-8 py-2 md:py-3 text-center">
             <div className="space-y-1 md:space-y-2">
               <p className="font-mono text-[8px] md:text-[9px] text-white/25 tracking-[0.4em] uppercase mb-2">Awaiting_Comm_Link</p>
               <h2 id="content-modal-title" className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight" style={{ color: themeColor }}>Get In Touch</h2>
             </div>
 
-            <div className="flex flex-col items-center gap-8 md:gap-10">
+            <div className="flex flex-col items-center gap-6 md:gap-8">
               {/* Animated orbit icon */}
-              <div className="relative flex items-center justify-center h-36 w-36 md:h-44 md:w-44">
+              <div className="relative flex items-center justify-center h-32 w-32 md:h-40 md:w-40">
                 <div
                   className="absolute inset-0 rounded-full border-2 border-dashed animate-spin-slow"
                   style={{ borderColor: `${themeColor}33`, animationDuration: '12s' }}
@@ -1182,20 +1204,20 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalPro
                   style={{ borderColor: `${themeColor}18`, animationDuration: '20s', animationDirection: 'reverse' }}
                 />
                 <div
-                  className="w-24 h-24 md:w-28 md:h-28 rounded-full flex items-center justify-center"
+                  className="h-[5.5rem] w-[5.5rem] md:h-28 md:w-28 rounded-full flex items-center justify-center"
                   style={{ background: `radial-gradient(circle, ${themeColor}12 0%, transparent 70%)` }}
                 >
                   <motion.div
                     animate={{ scale: [1, 1.08, 1], opacity: [0.75, 1, 0.75] }}
                     transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
                   >
-                    <Satellite size={52} className="md:w-16 md:h-16" style={{ color: themeColor }} />
+                    <BrandLogo className="h-12 w-12 md:h-16 md:w-16" style={{ color: themeColor }} />
                   </motion.div>
                 </div>
               </div>
 
               {/* Contact buttons */}
-              <div className="grid grid-cols-3 gap-4 md:gap-8 w-full max-w-xs md:max-w-sm">
+              <div className="grid grid-cols-3 gap-3 md:gap-6 w-full max-w-xs md:max-w-sm">
                 {[
                   { icon: <Mail size={22} className="md:w-6 md:h-6" />, label: 'EMAIL', link: `mailto:${CV_DATA.profile.email}` },
                   { icon: <LinkedInIcon size={22} className="md:w-6 md:h-6" />, label: 'LINKED', link: CV_DATA.profile.linkedinUrl, external: true },
@@ -1209,7 +1231,7 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalPro
                     className="flex flex-col items-center gap-2 md:gap-3 group"
                   >
                     <div
-                      className="p-4 md:p-5 rounded-xl md:rounded-2xl border border-white/8 bg-white/[0.03] group-hover:bg-white/[0.07] group-hover:border-white/20 group-hover:scale-105 transition-all duration-300"
+                      className="p-3.5 md:p-5 rounded-xl md:rounded-2xl border border-white/8 bg-white/[0.03] group-hover:bg-white/[0.07] group-hover:border-white/20 group-hover:scale-105 transition-all duration-300"
                       style={{ color: themeColor }}
                     >
                       {item.icon}
@@ -1224,7 +1246,7 @@ function ContentModal({ id, themeColor, activeConfig, onClose }: ContentModalPro
               <a
                 href={CV_DATA.profile.cvUrl}
                 download="Andhika_Nugroho_CV_Resume.pdf"
-                className="group/cv inline-flex w-full max-w-xs md:max-w-sm items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4 font-mono text-[9px] md:text-[10px] font-bold uppercase tracking-[0.25em] text-white/45 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.07] hover:text-white/85"
+                className="group/cv inline-flex w-full max-w-xs md:max-w-sm items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-3.5 md:py-4 font-mono text-[9px] md:text-[10px] font-bold uppercase tracking-[0.22em] md:tracking-[0.25em] text-white/45 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.07] hover:text-white/85"
                 style={{ boxShadow: `0 0 28px ${themeColor}10` }}
               >
                 <Download
